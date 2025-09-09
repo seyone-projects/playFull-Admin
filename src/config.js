@@ -15,7 +15,7 @@ if (applicationMode === 'development') {
 
   //server
   //apiUrl = "http://13.53.39.107/api/";
-  //imageBasePath = "http://13.53.39.107/uploads";;
+  //imageBasePath = "http://13.53.39.107/uploads";
   
 }
 const config = {
