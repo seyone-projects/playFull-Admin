@@ -1,11 +1,11 @@
 import React from 'react'
 import { useState } from 'react';
-import { Link,useSearchParams } from 'react-router-dom';
+import { Link, redirect } from 'react-router-dom';
 import config from '../../config';
 import { useGlobalContext } from '../../GlobalContext';
 import { isValidMobileNumber } from '../../help/validate';
-import { UserLogin } from '../../service/UserService';
 import { Helmet } from 'react-helmet';
+import { GetRedirectUrl } from '../../service/UserService';
 
 export default function Login() {
 
@@ -15,13 +15,12 @@ export default function Login() {
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
 
-  const [searchParams] = useSearchParams();
 
   const makeLogin = async () => {
 
-    if (mobile === "" || password === "") {
+    if (mobile === "") {
       setAppError(true);
-      setAppErrorMessage("Mobile and Password are required");
+      setAppErrorMessage("Mobile are required");
       setAppErrorTitle("Form Validation Error");
       setAppErrorMode("error");
       return;
@@ -36,18 +35,14 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      const response = await UserLogin(mobile, password);
+      const response = await GetRedirectUrl(mobile);      
       if (response.status === 200) 
-      {
-        const role = response.role; 
-        if (role === "admin") 
-        {         
-          setAppError(true);
-          setAppErrorTitle("Action Response");
-          setAppErrorMessage(response.message || "Login success");
-          setAppErrorMode("success");
-          window.location.reload();
-        }
+      {               
+        setAppError(true);
+        setAppErrorTitle("Action Response");        
+        setAppErrorMessage(response.message || "Redirect");
+        setAppErrorMode("success");
+        window.location.href = response.redirectUrl;     
       }
       else {
         setAppError(true);
@@ -65,22 +60,15 @@ export default function Login() {
     }
   };
 
-   React.useEffect(() => {
-    const mobileParam = searchParams.get("mobile");
-    if (mobileParam) {
-      setMobile(mobileParam);
-    }
-  }, [searchParams]);
-
   return (
     <>
       <Helmet>
-        <title>Login | {config.appName} </title>
+        <title>Single Sign In | {config.appName} </title>
       </Helmet>
       <div className='container'>
         <div className='row justify-content-center'>
           <div className='col col-md-4'>
-            <h4 className='mt-5 text-center login-title'> Admin Panel</h4>
+            <h4 className='mt-5 text-center login-title'> Single Sign In </h4>
             <div className='login'>
               <div className='logo-image-container'>
                 <img src={config.logo} alt="Playful Pencil" />
@@ -90,17 +78,13 @@ export default function Login() {
                   <div className="form-group">
                     <label >Mobile</label>
                     <input className='form-control' type="number" id="mobile" name="mobile"  value={mobile} onChange={(e) => setMobile(e.target.value)} />
-                  </div>
+                  </div>                  
                   <div className="form-group">
-                    <label >Password</label>
-                    <input className='form-control' type="password" id="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <button type="submit" className='btn btn-success-app' onClick={makeLogin}>Submit</button>
                   </div>
-                  <div className="form-group">
-                    <button type="submit" className='btn btn-success-app' onClick={makeLogin}>Login</button>
-                  </div>
-                </form>
+                </form>                
               </div>
-            </div>
+            </div>            
           </div>
         </div>
       </div>

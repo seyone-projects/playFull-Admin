@@ -60,6 +60,18 @@ import BatchFeeSchemeEdit from "./components/fee-scheme/BatchFeeSchemeEdit";
 import FeeSchemePaymentEdit from "./components/fee-scheme-payment/FeeSchemePaymentEdit";
 import BatchOverview from "./components/batch/BatchOverview";
 import UserKyc from "./components/user/UserKyc";
+import ReportStudentCollectionPayment from "./components/reports/StudentCollectionPaymentReports";
+import ReportStudentPendingPayment from "./components/reports/StudentPendingPaymentReports";
+import ReportBatchAttendance from "./components/reports/AttendanceBatchWiseReports";
+import ReportStudentAttendance from "./components/reports/AttendanceStudentWiseReports";
+import ReportLessonPlannerAttendance from "./components/reports/AttendanceLessonPlannerWiseReports";
+import BatchStudentPaymentUpdate from "./components/batchStudentPayment/PaymentUpdate";
+import LessonPlannerScreenshots from "./components/lesson-planner/LessonPlannerScreenshots";
+import LeaveRequestList from "./components/leave-request/LeaveRequestList";
+import LeaveRequestUpdate from "./components/leave-request/LeaveRequestUpdate";
+import ReportMonthlyAttendance from "./components/reports/AttendanceMonthlyReports";
+import ReportMonthlyPayment from "./components/reports/PaymentMonthlyReports";
+import SingleSignin from "./components/general/SingleSignin";
 
 function App() {
   library.add(fas); 
@@ -208,11 +220,13 @@ function App() {
                 <Route path="/batch-student/manage/:id" element={<BatchStudentList />} /> 
 
                 {/* fees */} 
-                <Route path="/batch-student-fee/manage/:userId/:id" element={<BatchStudentFeeList />} />
+                <Route path="/batch-student-fee/manage/:userId/:id/:batchStudentId" element={<BatchStudentFeeList />} />
+                <Route path="/batch-student-payment/manage/update/:id/:userId/:batchStudentId/:batchStudentPaymentId" element={<BatchStudentPaymentUpdate />} />
 
                 {/* lesson planner */}
                 <Route path="/batch-lesson-planner/manage/:id" element={<BatchLessonPlannerList />} />
                 <Route path="/batch-lesson-planner/manage/edit/:id/:batchId" element={<BatchLessonPlannerEdit />} />
+                <Route path="/batch-lesson-planner/manage/screenshots/:id/:batchId" element={<LessonPlannerScreenshots />} /> 
 
                 {/* attendance */}
                 <Route path="/attendance/manage/:id/:batchId" element={<AttendanceNew />} />
@@ -227,6 +241,17 @@ function App() {
 
                 {/* reports */}
                 <Route path="/report/student/payment" element={<ReportStudentPayment />} />
+                <Route path="/report/student/collection/payment" element={<ReportStudentCollectionPayment />} />
+                <Route path="/report/student/pending/payment" element={<ReportStudentPendingPayment />} />
+                <Route path="/report/batch/attendance" element={<ReportBatchAttendance />} />
+                <Route path="/report/student/attendance" element={<ReportStudentAttendance />} />
+                <Route path="/report/lessonplanner/attendance" element={<ReportLessonPlannerAttendance />} />
+                <Route path="/report/monthly/attendance" element={<ReportMonthlyAttendance />} />
+                <Route path="/report/monthly/payment" element={<ReportMonthlyPayment />} />
+
+                {/* leave request */}
+                <Route path="/leave-request/list" element={<LeaveRequestList />} />
+                <Route path="/leave-request/manage/:id/:batchId/:lessonPlannerId" element={<LeaveRequestUpdate />} />
 
                 {/* 404 Page */}   
                  <Route path="*"  element={<Dashboard />} />          
@@ -240,6 +265,8 @@ function App() {
           <BrowserRouter>
             <Routes>              
               <Route path="/login" element={<Login />} />
+              <Route path="/singleSignIn" element={<SingleSignin />} />
+
               {/* 404 Page */}
               <Route path="*" element={<Login />} />
             </Routes>

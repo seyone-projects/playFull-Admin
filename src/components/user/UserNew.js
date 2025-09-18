@@ -39,6 +39,8 @@ export default function UserNew() {
     const [trainerBankAccountNumber, setTrainerBankAccountNumber] = useState('');
     const [trainerBankIfscCode, setTrainerBankIfscCode] = useState('');
     const [trainerBankBranch, setTrainerBankBranch] = useState('');
+    const [educationProof, setEducationProof] = useState(null);
+    const [experienceProof, setExperienceProof] = useState(null);
 
     const [cities, setCities] = useState([]);
     const [genders, setGenders] = useState([]);
@@ -196,7 +198,6 @@ export default function UserNew() {
                 setAppErrorMessage("Please enter trainer PAN");
                 setAppErrorMode("error");
                 return;
-
             }
             if (!trainerAadhar) {
                 setAppError(true);
@@ -204,21 +205,7 @@ export default function UserNew() {
                 setAppErrorMessage("Please enter trainer Aadhar");
                 setAppErrorMode("error");
                 return;
-            }
-            if (!trainerPanImage) {
-                setAppError(true);
-                setAppErrorTitle("Error");
-                setAppErrorMessage("Please upload trainer PAN image");
-                setAppErrorMode("error");
-                return;
-            }
-            if (!trainerAadharImage) {
-                setAppError(true);
-                setAppErrorTitle("Error");
-                setAppErrorMessage("Please upload trainer Aadhar image");
-                setAppErrorMode("error");
-                return;
-            }
+            }           
             if (!trainerBankName) {
                 setAppError(true);
                 setAppErrorTitle("Error");
@@ -247,6 +234,27 @@ export default function UserNew() {
                 setAppErrorMode("error");
                 return;
             }
+             if (!trainerPanImage) {
+                setAppError(true);
+                setAppErrorTitle("Error");
+                setAppErrorMessage("Please upload trainer PAN image");
+                setAppErrorMode("error");
+                return;
+            }
+            if (!trainerAadharImage) {
+                setAppError(true);
+                setAppErrorTitle("Error");
+                setAppErrorMessage("Please upload trainer Aadhar image");
+                setAppErrorMode("error");
+                return;
+            }
+            if (!educationProof) {
+                setAppError(true);
+                setAppErrorTitle("Error");
+                setAppErrorMessage("Please upload education proof");
+                setAppErrorMode("error");
+                return;
+            }
             if (!acceptedTerms) {
                 setAppError(true);
                 setAppErrorTitle("Error");
@@ -260,7 +268,7 @@ export default function UserNew() {
         setIsLoading(true);
 
         try {
-            const response = await Add(cityId, genderId, name, email, mobile, whatsapp, password, image, role, joiningDate, parentMobile, parentEmail, parentWhatsapp, trainerPan, trainerAadhar, trainerPanImage, trainerAadharImage, trainerBankName, trainerBankAccountNumber, trainerBankIfscCode, trainerBankBranch);
+            const response = await Add(cityId, genderId, name, email, mobile, whatsapp, password, image, role, joiningDate, parentMobile, parentEmail, parentWhatsapp, trainerPan, trainerAadhar, trainerPanImage, trainerAadharImage, trainerBankName, trainerBankAccountNumber, trainerBankIfscCode, trainerBankBranch, educationProof, experienceProof);
             if (response.status === 200) {
                 setAppError(true);
                 setAppErrorTitle("Action Response");
@@ -465,19 +473,7 @@ export default function UserNew() {
                                                             <label className="form-label">Trainer Aadhar</label>
                                                             <input className='form-control' type='text' value={trainerAadhar} onChange={(e) => setTrainerAadhar(e.target.value)} />
                                                         </div>
-                                                    </div>
-                                                    <div className='col-lg-4 col-md-6 col-sm-6 col-12'>
-                                                        <div className="mb-3">
-                                                            <label className="form-label">Trainer PAN Image</label>
-                                                            <input className='form-control' type='file' onChange={(e) => setTrainerPanImage(e.target.files[0])} />
-                                                        </div>
-                                                    </div>
-                                                    <div className='col-lg-4 col-md-6 col-sm-6 col-12'>
-                                                        <div className="mb-3">
-                                                            <label className="form-label">Trainer Aadhar Image</label>
-                                                            <input className='form-control' type='file' onChange={(e) => setTrainerAadharImage(e.target.files[0])} />
-                                                        </div>
-                                                    </div>
+                                                    </div>                                                    
                                                     <div className='col-lg-4 col-md-6 col-sm-6 col-12'>
                                                         <div className="mb-3">
                                                             <label className="form-label">Trainer Bank Name</label>
@@ -501,6 +497,30 @@ export default function UserNew() {
                                                         <div className="mb-3">
                                                             <label className="form-label">Trainer Bank Branch</label>
                                                             <input className='form-control' type='text' value={trainerBankBranch} onChange={(e) => setTrainerBankBranch(e.target.value)} />
+                                                        </div>
+                                                    </div>
+                                                    <div className='col-lg-6 col-md-6 col-sm-6 col-12'>
+                                                        <div className="mb-3">
+                                                            <label className="form-label">Trainer PAN Image</label>
+                                                            <input className='form-control' type='file' onChange={(e) => setTrainerPanImage(e.target.files[0])} />
+                                                        </div>
+                                                    </div>
+                                                    <div className='col-lg-6 col-md-6 col-sm-6 col-12'>
+                                                        <div className="mb-3">
+                                                            <label className="form-label">Trainer Aadhar Image</label>
+                                                            <input className='form-control' type='file' onChange={(e) => setTrainerAadharImage(e.target.files[0])} />
+                                                        </div>
+                                                    </div>
+                                                    <div className='col-lg-6 col-md-6 col-sm-6 col-12'> 
+                                                        <div className="mb-3">
+                                                            <label className="form-label">Education Proof</label>
+                                                            <input className='form-control' type='file' onChange={(e) => setEducationProof(e.target.files[0])} />
+                                                        </div>
+                                                    </div>
+                                                    <div className='col-lg-6 col-md-6 col-sm-6 col-12'>
+                                                        <div className="mb-3">
+                                                            <label className="form-label">Experience Proof</label>
+                                                            <input className='form-control' type='file' onChange={(e) => setExperienceProof(e.target.files[0])} />
                                                         </div>
                                                     </div>
                                                     <div className='col-lg-12 col-md-12 col-sm-12 col-12'>

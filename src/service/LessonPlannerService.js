@@ -97,7 +97,7 @@ const Add = async (batchId, trainerId, lessonTopic, lessonDate, lessonTime, less
 }
 
 //update lesson planner
-const Update = async (id, batchId, trainerId, lessonTopic, lessonDate, lessonTime, lessonDuration, lessonDescription, link, remarks, status) => {
+const Update = async (id, batchId, trainerId, lessonTopic, lessonDate, lessonTime, lessonDuration, lessonDescription, link, remarks, status, screenshot1, screenshot2, screenshot3, screenshot4) => {
     try {
         const data = new FormData();
         data.append("batchId", batchId);
@@ -110,6 +110,12 @@ const Update = async (id, batchId, trainerId, lessonTopic, lessonDate, lessonTim
         data.append("link", link);
         data.append("remarks", remarks);
         data.append("status", status);
+
+        // Append screenshots only if provided
+        if (screenshot1) data.append("screenshot1", screenshot1);
+        if (screenshot2) data.append("screenshot2", screenshot2);
+        if (screenshot3) data.append("screenshot3", screenshot3);
+        if (screenshot4) data.append("screenshot4", screenshot4);
 
         const token = localStorage.getItem("oojwt");
         const response = await axios.post(config.apiUrl + 'lessonPlanners/update/' + id, data,

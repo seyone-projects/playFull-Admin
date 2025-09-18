@@ -275,7 +275,7 @@ export default function BatchLessonPlannerList() {
                     <div className='col-lg-6 col-md-6 col-sm-12'>
                       Batch Name : <strong>{batchDetails?.name || '-'}</strong>
                     </div>
-                     <div className='col-lg-6 col-md-6 col-sm-12'>
+                    <div className='col-lg-6 col-md-6 col-sm-12'>
                       Trainer Name : <strong>{batchDetails?.trainerId?.username || '-'}</strong>
                     </div>
                   </div>
@@ -362,68 +362,74 @@ export default function BatchLessonPlannerList() {
                 <h5><b><FontAwesomeIcon icon="fa-solid fa-book" /> Lesson Planner List </b></h5>
                 <div className='table-content'>
                   <div className="mobile-scroll">
-                  <table className='table table-bordered table-condensed'>
-                    <thead>
-                      <tr>
-                        <th>Trainer</th>
-                        <th>Topic</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Duration (in mins)</th>
-                        <th>Link</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {lessonPlanners.length === 0 ? (
+                    <table className='table table-bordered table-condensed'>
+                      <thead>
                         <tr>
-                          <td colSpan="8" className='text-center'>No records found</td>
+                          <th>Trainer</th>
+                          <th>Topic</th>
+                          <th>Date</th>
+                          <th>Time</th>
+                          <th>Duration (in mins)</th>
+                          <th>Link</th>
+                          <th>Status</th>
+                          <th>Action</th>
                         </tr>
-                      ) : (
-                        lessonPlanners.map((lesson) => (
-                          <tr key={lesson._id}>
-                            <td>{lesson.trainerId?.username || '-'}</td>
-                            <td>{lesson.lessonTopic}</td>
-                            <td>
-                              {lesson?.lessonDate
-                                ? (() => {
-                                  const date = new Date(lesson.lessonDate);
-                                  const day = String(date.getDate()).padStart(2, '0');
-                                  const month = String(date.getMonth() + 1).padStart(2, '0');
-                                  const year = date.getFullYear();
-                                  return `${day}-${month}-${year}`;
-                                })()
-                                : '-'}
-                            </td>
-                            <td>{formatTimeWithAMPM(lesson.lessonTime)}</td>
-                            <td>{lesson.lessonDuration} mins</td>
-                            <td>
-                              {lesson.link ? (
-                                <a href={lesson.link} target="_blank" rel="noopener noreferrer">
-                                  Join
-                                </a>
-                              ) : (
-                                <span>—</span>
-                              )}
-                            </td>
-                            <td>{lesson.status.charAt(0).toUpperCase() + lesson.status.slice(1)}</td>
-                            <td>
-                              <Link to={`/batch-lesson-planner/manage/edit/${lesson._id}/${id}`} className='btn btn-sm btn-primary me-2'>
-                                <FontAwesomeIcon icon="fa-solid fa-pen-to-square" />
-                              </Link>
-                              <button className="btn btn-sm btn-warning me-2" onClick={() => { setSelectedLesson(lesson); setShowModal(true); }}>
-                                <FontAwesomeIcon icon="fa-solid fa-eye" />
-                              </button>
-                              <Link to={`/attendance/manage/${lesson._id}/${id}`} className='btn btn-sm btn-dark me-2'>
-                                <FontAwesomeIcon icon="fa-solid fa-calendar-check" /> Attendance
-                              </Link>
-                            </td>
+                      </thead>
+                      <tbody>
+                        {lessonPlanners.length === 0 ? (
+                          <tr>
+                            <td colSpan="8" className='text-center'>No records found</td>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                        ) : (
+                          lessonPlanners.map((lesson) => (
+                            <tr key={lesson._id}>
+                              <td>{lesson.trainerId?.username || '-'}</td>
+                              <td>{lesson.lessonTopic}</td>
+                              <td>
+                                {lesson?.lessonDate
+                                  ? (() => {
+                                    const date = new Date(lesson.lessonDate);
+                                    const day = String(date.getDate()).padStart(2, '0');
+                                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                                    const year = date.getFullYear();
+                                    return `${day}-${month}-${year}`;
+                                  })()
+                                  : '-'}
+                              </td>
+                              <td>{formatTimeWithAMPM(lesson.lessonTime)}</td>
+                              <td>{lesson.lessonDuration} mins</td>
+                              <td>
+                                {lesson.link ? (
+                                  <a href={lesson.link} target="_blank" rel="noopener noreferrer">
+                                    Join
+                                  </a>
+                                ) : (
+                                  <span>—</span>
+                                )}
+                              </td>
+                              <td>{lesson.status.charAt(0).toUpperCase() + lesson.status.slice(1)}</td>
+                              <td>
+                                <Link to={`/batch-lesson-planner/manage/edit/${lesson._id}/${id}`} className='btn btn-sm btn-primary me-2'>
+                                  <FontAwesomeIcon icon="fa-solid fa-pen-to-square" />
+                                </Link>
+                                <Link
+                                  to={`/batch-lesson-planner/manage/screenshots/${lesson._id}/${id} `}
+                                  className="btn btn-sm btn-info me-2"
+                                >
+                                  <FontAwesomeIcon icon="fa-solid fa-image" />
+                                </Link>
+                                <button className="btn btn-sm btn-warning me-2" onClick={() => { setSelectedLesson(lesson); setShowModal(true); }}>
+                                  <FontAwesomeIcon icon="fa-solid fa-eye" />
+                                </button>
+                                <Link to={`/attendance/manage/${lesson._id}/${id}`} className='btn btn-sm btn-dark me-2'>
+                                  <FontAwesomeIcon icon="fa-solid fa-calendar-check" /> Attendance
+                                </Link>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                   {totalItems > itemsPerPage && (
                     <div className="pagination mt-3 d-flex justify-content-center">

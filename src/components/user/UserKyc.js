@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet';
 import config from '../../config';
 import { useGlobalContext } from '../../GlobalContext';
 import { useParams } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Update, GetUserById } from '../../service/UserService';
 import { CityGetAll } from '../../service/CityService';
 import { GenderGetAll } from '../../service/GenderService';
@@ -44,6 +45,8 @@ export default function UserKyc() {
     const [trainerBankAccountNumber, setTrainerBankAccountNumber] = useState('');
     const [trainerBankIfscCode, setTrainerBankIfscCode] = useState('');
     const [trainerBankBranch, setTrainerBankBranch] = useState('');
+    const [educationProof, setEducationProof] = useState(null);
+    const [experienceProof, setExperienceProof] = useState(null);
 
     const [cities, setCities] = useState([]);
     const [genders, setGenders] = useState([]);
@@ -123,6 +126,8 @@ export default function UserKyc() {
                 setTrainerBankAccountNumber(response.user.trainerBankAccountNumber);
                 setTrainerBankIfscCode(response.user.trainerBankIfscCode);
                 setTrainerBankBranch(response.user.trainerBankBranch);
+                setEducationProof(response.user.educationProof);
+                setExperienceProof(response.user.experienceProof);
             }
         } catch (error) {
             setAppError(true);
@@ -296,7 +301,7 @@ export default function UserKyc() {
                                             )}
                                         </div>
                                     </div>
-                                    <h4>KYC Details</h4>
+                                    <h4><FontAwesomeIcon icon="fas fa-id-card" /> KYC Details</h4>
                                     <div className='row'>
                                         <div className='col-lg-6 col-md-6 col-sm-6 col-12'>
                                             <div className="mb-3">
@@ -338,33 +343,64 @@ export default function UserKyc() {
                                             </div>
                                         </div>
                                         <hr></hr>
-                                        <h4>Bank Details</h4>
-                                        <div className='col-lg-4 col-md-6 col-sm-6 col-12'>
+                                         <h4><FontAwesomeIcon icon="fas fa-university" /> Bank Details</h4>
+                                        <div className='col-lg-3 col-md-6 col-sm-6 col-12'>
                                             <div className="mb-3">
                                                 <label className="form-label">Bank Name</label>
                                                 <input className='form-control' type='text' value={trainerBankName} readOnly />
                                             </div>
                                         </div>
-                                        <div className='col-lg-4 col-md-6 col-sm-6 col-12'>
+                                        <div className='col-lg-3 col-md-6 col-sm-6 col-12'>
                                             <div className="mb-3">
                                                 <label className="form-label">Bank Account Number</label>
                                                 <input className='form-control' type='text' value={trainerBankAccountNumber} readOnly />
                                             </div>
                                         </div>
-                                        <div className='col-lg-4 col-md-6 col-sm-6 col-12'>
+                                        <div className='col-lg-3 col-md-6 col-sm-6 col-12'>
                                             <div className="mb-3">
                                                 <label className="form-label">IFSC Code</label>
                                                 <input className='form-control' type='text' value={trainerBankIfscCode} readOnly />
                                             </div>
                                         </div>
-                                        <div className='col-lg-4 col-md-6 col-sm-6 col-12'>
+                                        <div className='col-lg-3 col-md-6 col-sm-6 col-12'>
                                             <div className="mb-3">
                                                 <label className="form-label">Bank Branch</label>
                                                 <input className='form-control' type='text' value={trainerBankBranch} readOnly />
                                             </div>
                                         </div>
+                                        <hr></hr>
+                                         <h4><FontAwesomeIcon icon="fas fa-graduation-cap" /> Education Details</h4>
+                                         <div className='col-lg-6 col-md-6 col-sm-6 col-12'>
+                                            <div className="mb-3">
+                                                <label className="form-label">Education Proof</label><br></br>
+                                                {educationProof && (
+                                                    <img
+                                                        src={`${config.imageBasePath}/education/${user._id}.${educationProof}`}
+                                                        alt="Education"
+                                                        className='img-fluid image-xs'
+                                                        style={{ width: '100%', marginTop: '10px', height: '300px' }}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                        {experienceProof && (
+                                        <div className='col-lg-6 col-md-6 col-sm-6 col-12'>
+                                            <div className="mb-3">
+                                                <label className="form-label">Experience Proof</label>
+                                                <br></br>
+                                                {experienceProof && (
+                                                    <img
+                                                        src={`${config.imageBasePath}/experience/${user._id}.${experienceProof}`}
+                                                        alt="Experience"
+                                                        className='img-fluid image-xs'
+                                                        style={{ width: '100%', marginTop: '10px', height: '300px' }}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                        )}
                                     </div>
-
+                                    
                                 </div>
                             </div>
                         </div>
