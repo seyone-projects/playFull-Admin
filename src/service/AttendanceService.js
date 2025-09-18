@@ -181,4 +181,134 @@ const DeleteByBatchAndLessonPlanner = async (batchId, lessonPlannerId) => {
     }
 }
 
-export { Add, Update, GetById, GetAllAttendance, GetByLessonPlannerId, DeleteByBatchAndLessonPlanner };
+//get attendance reports with date and batch filters
+const GetAttendanceReportsByBatchId = async (fromDate, toDate, batchId, page, limit) => {
+    try {
+        const token = localStorage.getItem("oojwt");
+        const response = await axios.get(`${config.apiUrl}attendances/batchwise-attendance-report?fromDate=${fromDate}&toDate=${toDate}&batchId=${batchId}&page=${page}&limit=${limit}`,
+            {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+        if (response.status === 200) {
+           const d = response.data.data; // ✅ correct level
+            return {
+                status: 200,
+                message: response.data.message,
+                attendances: d.attendances,
+                totalItems: d.totalItems,
+                totalPages: d.totalPages,
+                currentPage: d.currentPage,               
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            status: 400,
+            message: error.response.data.message
+        };
+    }
+}
+
+
+//get attendance reports by studentid with pagination
+const GetAttendanceReportsByStudentId = async (fromDate, toDate, studentId, page, limit) => {
+    try {
+        const token = localStorage.getItem("oojwt");
+        const response = await axios.get(`${config.apiUrl}attendances/studentwise-attendance-report?fromDate=${fromDate}&toDate=${toDate}&studentId=${studentId}&page=${page}&limit=${limit}`,
+            {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+        if (response.status === 200) {
+            const data = response.data.data;
+            return {
+                status: 200,
+                message: response.data.message,
+                attendances: data.attendances,
+                totalItems: data.totalItems, 
+                totalPages: data.totalPages,
+                currentPage: data.currentPage
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            status: 400,
+            message: error.response.data.message
+        };
+    }
+}
+
+//get attendance reports by lessonplannerid with pagination
+const GetAttendanceReportsByLessonPlannerId = async (fromDate, toDate, lessonPlannerId, page, limit) => {
+    try {
+        const token = localStorage.getItem("oojwt");
+        const response = await axios.get(`${config.apiUrl}attendances/lessonwise-attendance-report-student?fromDate=${fromDate}&toDate=${toDate}&lessonId=${lessonPlannerId}&page=${page}&limit=${limit}`,
+            {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+        if (response.status === 200) {
+            const data = response.data.data;
+            return {
+                status: 200,
+                message: response.data.message,
+                attendances: data.attendances,
+                totalItems: data.totalItems, 
+                totalPages: data.totalPages,
+                currentPage: data.currentPage
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            status: 400,
+            message: error.response.data.message
+        };
+    }
+}
+
+//get monthly summary report by month, year
+const GetMonthlySummaryReport = async (month, year) => {
+    try {
+        const token = localStorage.getItem("oojwt");
+        const response = await axios.get(
+            `${config.apiUrl}attendances/monthly-summary?month=${month}&year=${year}`,
+            {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            }
+        );
+
+        if (response.status === 200) {
+            const data = response.data;
+
+            return {
+                status: 200,
+                message: data.message,
+                summary: data.data,      // map backend "data" into "summary"
+                totalItems: data.data.length,  // count batches
+                totalPages: 1,           // no pagination yet, so set to 1
+                currentPage: 1
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            status: 400,
+            message: error.response?.data?.message || "Something went wrong"
+        };
+    }
+};
+
+
+export { Add, Update, GetById, GetAllAttendance, GetByLessonPlannerId, DeleteByBatchAndLessonPlanner, GetAttendanceReportsByBatchId, GetAttendanceReportsByStudentId, GetAttendanceReportsByLessonPlannerId, GetMonthlySummaryReport };
+

@@ -6,8 +6,7 @@ import { useGlobalContext } from '../../GlobalContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GetById } from '../../service/BatchService';
 import { GetUserById } from '../../service/UserService';
-import { GetAllPaymode } from '../../service/PaymodeService';
-import { Add, GetByUserAndBatch, Delete } from '../../service/PaymentService';
+import { GetPaymentsByBatchStudentId } from '../../service/BatchStudentPaymentService';
 
 export default function BatchStudentFeeList() {
   const {
@@ -28,16 +27,12 @@ export default function BatchStudentFeeList() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 10;
-  const { id, userId } = useParams();
+  const { id, userId, batchStudentId } = useParams();
 
   const [payments, setPayments] = useState([]);
 
   const [batchDetails, setBatchDetails] = useState({});
   const [userDetails, setUserDetails] = useState({});
-
-  // paymode
-  const [paymodeId, setPaymodeId] = useState('');
-  const [paymodes, setPaymodes] = useState([]);
 
   //payment
   const [amount, setAmount] = useState('');
@@ -92,39 +87,18 @@ export default function BatchStudentFeeList() {
     }
   };
 
-  const fetchPaymodes = async () => {
-    try {
-      setIsLoading(true);
-      const response = await GetAllPaymode();
-      if (response?.paymodes) {
-        // Filter only active paymodes
-        const activePaymodes = response.paymodes.filter(paymode => paymode.status === "active");
-        setPaymodes(activePaymodes);
-      } else {
-        setPaymodes([]);
-      }
-    } catch (error) {
-      setAppError(true);
-      setAppErrorTitle("Error");
-      setAppErrorMessage("Failed to fetch paymodes");
-      setAppErrorMode("error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-
   const fetchPaymentList = async (page = 1) => {
     try {
       setIsLoading(true);
-      var response = await GetByUserAndBatch(userId, id, page, itemsPerPage);
+      var response = await GetPaymentsByBatchStudentId(batchStudentId, page, itemsPerPage);
       console.log(response);
       setPayments(response.payments);
       setCurrentPage(response.currentPage);
       setTotalPages(response.totalPages);
       setTotalItems(response.totalItems);
-      setAmountPaid(response.totalPaidAmount);
-      setBalance(response.balance);
+      setAmountPaid(response.totalPaid);
+      console.log(response.totalPaid);
+      setBalance(response.totalPending);
       setTotal(response.totalFee);
     } catch (error) {
       setAppError(true);
@@ -144,87 +118,7 @@ export default function BatchStudentFeeList() {
   useEffect(() => {
     fetchBatchDetails();
     fetchUserDetails();
-    fetchPaymodes();
   }, []);
-
-
-  //create a function to send the amount and image to axios post to save the cateogry
-  const savePayment = async (event) => {
-    event.preventDefault();
-
-
-    // Validation 
-    if (!amount || isNaN(amount) || Number(amount) <= 0) {
-      setAppError(true);
-      setAppErrorTitle("Error");
-      setAppErrorMessage("Payment amount must be greater than 0.");
-      setAppErrorMode("error");
-      return;
-    }
-
-    if (!paymodeId) {
-      setAppError(true);
-      setAppErrorTitle("Error");
-      setAppErrorMessage("Please select a payment mode.");
-      setAppErrorMode("error");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      let response = null;
-      response = await Add(paymodeId, userId, id, amount, paymentDateTime, paymentReference, reason);
-
-      if (response.status === 200) {
-        setAppError(true);
-        setAppErrorTitle("Action Response");
-        setAppErrorMessage(response.message || "Payment Successfully Added");
-        setAppErrorMode("success");
-        if (userId && id) {
-          window.location.href = `/batch-student-fee/manage/${userId}/${id}`;
-        } else {
-          console.error("Invalid userId or batch id");
-        }
-      } else {
-        setAppError(true);
-        setAppErrorTitle("Error");
-        setAppErrorMessage(response.message || "Action failed. Please try again.");
-        setAppErrorMode("error");
-      }
-    } catch (error) {
-      setAppError(true);
-      setAppErrorTitle("Error");
-      setAppErrorMessage("Something went wrong. Please try again.");
-      setAppErrorMode("error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-
-  const handleDeleteUser = async (paymentId) => {
-    const confirmed = window.confirm("Are you sure you want to remove this student?");
-    if (confirmed) {
-      const result = await Delete(paymentId);
-      if (result.status === 200) {
-        setAppError(true);
-        setAppErrorTitle("Success");
-        setAppErrorMessage(result.message || "Payment removed successfully");
-        setAppErrorMode("success");
-        if (userId && id) {
-          window.location.href = `/batch-student-fee/manage/${userId}/${id}`;
-        } else {
-          console.error("Invalid userId or batch id");
-        }
-      } else {
-        setAppError(true);
-        setAppErrorTitle("Error");
-        setAppErrorMessage(result.message || "Failed to delete payment");
-        setAppErrorMode("error");
-      }
-    }
-  };
 
 
 
@@ -339,107 +233,65 @@ export default function BatchStudentFeeList() {
                 </div>
                 <br></br>
                 <div className='row'>
-                  <div className='col-lg-4 col-md-4 col-xs-12'>
-                    <h5><b> <FontAwesomeIcon icon="fa-solid fa-plus-circle" /> Add Payment</b></h5>
-                    <div className='batch-details'>
-                      <form onSubmit={savePayment} encType='multipart/form-data'>
-                        <div className='row'>
-                          <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
-                            <div className="mb-3">
-                              <label className="form-label">Payment Date</label>
-                              <input className='form-control' type='date' value={paymentDateTime} onChange={(e) => setPaymentDateTime(e.target.value)} />
-                            </div>
-                          </div>
-                          <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
-                            <div className="mb-3">
-                              <label className="form-label">Amount</label>
-                              <input className='form-control' type='text' value={amount} onChange={(e) => setAmount(e.target.value)} />
-                            </div>
-                          </div>
-                          <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
-                            <div className="mb-3">
-                              <label className="form-label">Paymode</label>
-                              <select
-                                className="form-control"
-                                value={paymodeId} // Ensure this state is defined
-                                onChange={(e) => setPaymodeId(e.target.value)} // Update correctly
-                              >
-                                <option value="">Select Paymode</option>
-                                {paymodes.map(paymodeOption => (
-                                  <option key={paymodeOption._id} value={paymodeOption._id}>
-                                    {paymodeOption.name}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                          <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
-                            <div className="mb-3">
-                              <label className="form-label">Payment Reference</label>
-                              <input className='form-control' type='text' value={paymentReference} onChange={(e) => setPaymentReference(e.target.value)} />
-                            </div>
-                          </div>
-                          <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
-                            <div className="mb-3">
-                              <label className="form-label">Reason</label>
-                              <input className='form-control' type='text' value={reason} onChange={(e) => setReason(e.target.value)} />
-                            </div>
-                          </div>
-                          <div className='clearfix'></div>
-                          <div className='col-12 text-end'>
-                            <div className="mb-3">
-                              <button type='submit' className='btn btn-success-app btn-md'> <i className="ri-check-fill"></i> Add Payment </button>
-                            </div>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                  <div className='col-lg-8 col-md-8 col-xs-12'>
-                    <h5><b> <FontAwesomeIcon icon="fa-solid fa-sack-dollar" /> Old Fee Details</b></h5>
+                  <div className='col-lg-12 col-md-12 col-xs-12'>
+                    <h5><b> <FontAwesomeIcon icon="fa-solid fa-sack-dollar" /> Fee Details</b></h5>
                     <div className='table-content'>
                       <div className="mobile-scroll">
-                      <table className='table table-bordered table-condensed'>
-                        <thead>
-                          <tr>
-                            <th>Payment Date</th>
-                            <th>Amount (Rs.)</th>
-                            <th>Paymode</th>
-                            <th>Payment Ref.</th>
-                            <th>Reason</th>
-                            <th>Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {payments && payments.map((payment) => (
-                            <tr key={payment._id}>
-                              <td>
-                                {payment.paymentDateTime
-                                  ? (() => {
-                                    const date = new Date(payment.paymentDateTime);
-                                    const day = String(date.getDate()).padStart(2, '0');
-                                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                                    const year = date.getFullYear();
-                                    return `${day}-${month}-${year}`;
-                                  })()
-                                  : ''}
-                              </td>
-                              <td>{payment.amount}</td>
-                              <td>{payment.paymodeId?.name || '-'}</td>
-                              <td>{payment.paymentReference || '-'}</td>
-                              <td>{payment.reason || '-'}</td>
-                              <td>
-                                <button
-                                  className='btn btn-sm btn-danger'
-                                  onClick={() => handleDeleteUser(payment._id)}
-                                >
-                                  <FontAwesomeIcon icon="fa-solid fa-trash" />
-                                </button>
-                              </td>
+                        <table className='table table-bordered table-condensed'>
+                          <thead>
+                            <tr>
+                              <th>Due Date</th>
+                              <th>Amount (Rs.)</th>
+                              <th>Payment Date</th>
+                              <th>Payment Ref.</th>
+                              <th>Status</th>
+                              <th>Action</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {payments && payments.map((payment) => (
+                              <tr key={payment._id}>
+                                <td>
+                                  {payment.lastDate
+                                    ? (() => {
+                                      const date = new Date(payment.lastDate);
+                                      const day = String(date.getDate()).padStart(2, '0');
+                                      const month = String(date.getMonth() + 1).padStart(2, '0');
+                                      const year = date.getFullYear();
+                                      return `${day}-${month}-${year}`;
+                                    })()
+                                    : '-'}
+                                </td>
+                                <td>{payment.amount}</td>
+                                 <td>
+                                  {payment.paymentDateTime
+                                    ? (() => {
+                                      const date = new Date(payment.paymentDateTime);
+                                      const day = String(date.getDate()).padStart(2, '0');
+                                      const month = String(date.getMonth() + 1).padStart(2, '0');
+                                      const year = date.getFullYear();
+                                      return `${day}-${month}-${year}`;
+                                    })()
+                                    : '-'}
+                                </td>
+                                <td>{payment.paymentReference || '-'}</td>
+                                <td>{payment.status}</td>
+                                <td>
+                                  {payment.status === "active" ? (
+                                    <Link
+                                      to={`/batch-student-payment/manage/update/${id}/${userId}/${batchStudentId}/${payment._id}`}
+                                      className="btn btn-sm btn-success"
+                                    >
+                                      <FontAwesomeIcon icon="fa-solid fa-wallet" /> Update Payment
+                                    </Link>
+                                  ) : (
+                                    <span className="text-success fw-bold">Payment Updated</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
                       {totalItems > 10 && (
                         <div className="pagination mt-3 d-flex justify-content-center">

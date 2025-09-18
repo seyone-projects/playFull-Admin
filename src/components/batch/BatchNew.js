@@ -330,13 +330,13 @@ export default function BatchNew() {
                                             </div>
                                             <div className='col-lg-4 col-md-4 col-sm-6 col-12'>
                                                 <div className="mb-3">
-                                                    <label className="form-label">Trainer Cost</label>
+                                                    <label className="form-label">Trainer Cost (Rs.)</label>
                                                     <input className='form-control' type='number' value={trainerCost} onChange={(e) => setTrainerCost(e.target.value)} />
                                                 </div>
                                             </div>
                                             <div className='col-lg-4 col-md-4 col-sm-6 col-12'>
                                                 <div className="mb-3">
-                                                    <label className="form-label">Trainer TDS</label>
+                                                    <label className="form-label">Trainer TDS (%)</label>
                                                     <input className='form-control' type='number' value={trainerTds} onChange={(e) => setTrainerTds(e.target.value)} />
                                                 </div>
                                             </div>

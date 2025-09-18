@@ -1,17 +1,17 @@
 // src/config.js
 const applicationMode = "development";
-var appName = "Playful Administration";
-var apiUrl = "http://13.234.225.146:5000/api/";
+var appName = "Admin Panel";
+var apiUrl = "http://localhost:5000/api/";
 var pageSize = 10;
 var logo = "/logo.png";
-var imageBasePath = "http://13.234.225.146:5000/uploads";
+var imageBasePath = "http://localhost:5000/uploads";
 
 if (applicationMode === 'development') {
-  appName = "Playful Administration";
+  appName = "Admin Panel";
   
   //local
-  apiUrl = "http://13.234.225.146:5000/api/"; 
-  imageBasePath = "http://13.234.225.146:5000/uploads";  
+  apiUrl = "http://localhost:5000/api/"; 
+  imageBasePath = "http://localhost:5000/uploads";  
 
   //server
   //apiUrl = "http://13.53.39.107/api/";

@@ -6,7 +6,8 @@ import { useGlobalContext } from '../../GlobalContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GetById, GetUsersByBatchId } from '../../service/BatchService';
 import { GetUserById } from '../../service/UserService';
-import { GetByUserAndBatch, GetByBatchId } from '../../service/PaymentService';
+import { GetByBatchId as GetByBatchIdBatchStudent } from '../../service/BatchStudentService';
+import { GetPaymentsByBatchStudentId } from '../../service/BatchStudentPaymentService';
 
 export default function BatchSummary() {
   const {
@@ -38,6 +39,8 @@ export default function BatchSummary() {
   const [amountPaid, setAmountPaid] = useState(0);
   const [balance, setBalance] = useState(0);
   const [total, setTotal] = useState(0);
+
+  const [batchStudents, setBatchStudents] = useState([]);
 
   //student count 
   const [studentCount, setStudentCount] = useState(0);
@@ -89,37 +92,25 @@ export default function BatchSummary() {
 
   const fetchBatchStudentList = async () => {
     try {
-      let totalPaid = 0;
       setIsLoading(true);
-      const response = await GetUsersByBatchId(id, 1, 9999);
-      const students = response.users || [];
+      const response = await GetByBatchIdBatchStudent(id, 1, 9999);
 
-      for (const student of students) {
-        const paymentRes = await GetByUserAndBatch(student._id, id, 1, 9999);
-        totalPaid += paymentRes.totalPaidAmount || 0;
-      }
+      // For each batchStudent, fetch their payments
+      const studentsWithPayments = await Promise.all(
+        response.batchStudents.map(async (batchStudent) => {
+          const paymentResponse = await GetPaymentsByBatchStudentId(batchStudent._id, 1, 9999);
+          setStudentCount(paymentResponse.batchStats?.noOfStudents || 0);
+          setTotal(paymentResponse.batchStats?.totalToBeReceived || 0);
+          setAmountPaid(paymentResponse.batchStats?.totalReceived || 0);
+          setBalance(paymentResponse.batchStats?.totalPending || 0);
+          return {
+            ...batchStudent,
+            payments: paymentResponse?.payments || []
+          };
+        })
+      );
 
-      setAmountPaid(totalPaid);
-      const totalToBeReceived = students.length * parseFloat(batchDetails.fee || 0);
-      setTotal(totalToBeReceived);
-      setBalance(totalToBeReceived - totalPaid);
-      setStudentCount(response.totalItems);
-    } catch (error) {
-      setAppError(true);
-      setAppErrorTitle("Error");
-      setAppErrorMessage("Failed to load data");
-      setAppErrorMode("error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  //fetch get by batch id
-  const fetchBatchPayments = async (page = 1) => {
-    try {
-      setIsLoading(true);
-      var response = await GetByBatchId(id, page, itemsPerPage);
-      setPayments(response.payments);
+      setBatchStudents(studentsWithPayments);
       setCurrentPage(response.currentPage);
       setTotalPages(response.totalPages);
       setTotalItems(response.totalItems);
@@ -157,9 +148,6 @@ export default function BatchSummary() {
     fetchBatchStudentList();
   }, []);
 
-  React.useEffect(() => {
-    fetchBatchPayments(currentPage);
-  }, []);
 
   React.useEffect(() => {
     fetchBatchStudentListPayment(currentPageStudent);
@@ -351,107 +339,98 @@ export default function BatchSummary() {
                 </div>
                 <div className='row'>
                   <div className='col-lg-12 col-md-12 col-xs-12'>
-                    <h5><b> <FontAwesomeIcon icon="fa-solid fa-coins" /> Payment Details</b></h5>
+                    <h5><b> <FontAwesomeIcon icon="fa-solid fa-users" /> Student & Payment Details</b></h5>
                     <div className='table-content'>
                       <div className="mobile-scroll">
-                      <table className='table table-bordered table-condensed'>
-                        <thead>
-                          <tr>
-                            <th>Payment Date</th>
-                            <th>Student Name</th>
-                            <th>Amount (Rs.)</th>
-                            <th>Paymode</th>
-                            <th>Payment Ref.</th>
-                            <th>Reason</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {payments && payments.map((payment) => (
-                            <tr key={payment._id}>
-                              <td>
-                                {payment.paymentDateTime
-                                  ? (() => {
-                                    const date = new Date(payment.paymentDateTime);
-                                    const day = String(date.getDate()).padStart(2, '0');
-                                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                                    const year = date.getFullYear();
-                                    return `${day}-${month}-${year}`;
-                                  })()
-                                  : ''}
-                              </td>
-                              <td>{payment.userId?.username || '-'}</td>
-                              <td>{payment.amount}</td>
-                              <td>{payment.paymodeId?.name || '-'}</td>
-                              <td>{payment.paymentReference || '-'}</td>
-                              <td>{payment.reason || '-'}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                        {batchStudents && batchStudents.length > 0 ? (
+                          batchStudents.map((batchStudent) => (
+                            <div key={batchStudent._id} style={{ marginBottom: "20px", border: "1px solid #1f1515ff",  boxShadow: "rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;" }}>
+
+                              {/* Student Table */}
+                              <table className="table table-bordered table-condensed mb-0">
+                                <thead>
+                                  <tr>
+                                    <th>Student Name</th>
+                                    <th>Mobile</th>
+                                    <th>Email</th>
+                                    <th>Joining Date</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td style={{ fontSize: "20px", color: "#ee1414ff", fontWeight: "bold" }}>{batchStudent.userId.username}</td>
+                                    <td>{batchStudent.userId.mobile}</td>
+                                    <td>{batchStudent.userId.email}</td>
+                                    <td>
+                                      {batchStudent.userId.joiningDate
+                                        ? (() => {
+                                          const date = new Date(batchStudent.userId.joiningDate);
+                                          return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+                                        })()
+                                        : '-'}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+
+                              {/* Payment Table */}
+                              <div style={{ borderTop: "1px solid #ccc" }}>
+                                <div style={{ background: "#f6faf6ff", color: "#201616", padding: "5px 10px", fontWeight: "bold", textAlign: "center" }}>
+                                  Payment Details
+                                </div>
+                                <table className="table table-bordered table-condensed mb-0">
+                                  <thead>
+                                    <tr>
+                                      <th>Due Date</th>
+                                      <th>Amount (Rs.)</th>
+                                      <th>Payment Date</th>
+                                      <th>Payment Ref.</th>
+                                      <th>Status</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {batchStudent.payments && batchStudent.payments.length > 0 ? (
+                                      batchStudent.payments.map((payment) => (
+                                        <tr key={payment._id}>
+                                          <td>
+                                            {payment.lastDate
+                                              ? (() => {
+                                                const date = new Date(payment.lastDate);
+                                                return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+                                              })()
+                                              : '-'}
+                                          </td>
+                                          <td>{payment.amount}</td>
+                                          <td>
+                                            {payment.paymentDateTime
+                                              ? (() => {
+                                                const date = new Date(payment.paymentDateTime);
+                                                return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+                                              })()
+                                              : '-'}
+                                          </td>
+                                          <td>{payment.paymentReference || '-'}</td>
+                                          <td>{payment.status}</td>
+                                        </tr>
+                                      ))
+                                    ) : (
+                                      <tr>
+                                        <td colSpan="5" style={{ textAlign: "center" }}>No Payments Found</td>
+                                      </tr>
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          // ELSE loop for no students
+                          <div style={{ textAlign: "center", padding: "20px", border: "1px solid #ddd", borderRadius: "6px" }}>
+                            No Students Found in this Batch
+                          </div>
+                        )}
                       </div>
-                      {totalItems > 10 && (
-                        <div className="pagination mt-3 d-flex justify-content-center">
-                          <span className="align-self-center me-3">
-                            {currentPage > 1 && (
-                              <button
-                                className="btn btn-outline-primary me-2"
-                                onClick={() => fetchBatchPayments(currentPage - 1)}
-                              >
-                                Previous
-                              </button>
-                            )}
-                            Page {currentPage} of {totalPages}
-                            {currentPage < totalPages && (
-                              <button
-                                className="btn btn-outline-primary ms-2"
-                                onClick={() => fetchBatchPayments(currentPage + 1)}
-                              >
-                                Next
-                              </button>
-                            )}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <br></br>
-                <div className='row'>
-                  <div className='col-lg-12 col-md-12 col-xs-12'>
-                    <h5><b> <FontAwesomeIcon icon="fa-solid fa-users" /> Student Details</b></h5>
-                    <div className='table-content'>
-                      <div className="mobile-scroll">
-                      <table className='table table-bordered table-condensed'>
-                        <thead>
-                          <tr>
-                            <th>Student Name</th>
-                            <th>Mobile</th>
-                            <th>Email</th>
-                            <th>Joining Date</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {users && users.map((user) => (
-                            <tr key={user._id}>
-                              <td>{user.username}</td>
-                              <td>{user.mobile}</td>
-                              <td>{user.email}</td>
-                              <td>
-                                {user.joiningDate
-                                  ? (() => {
-                                    const date = new Date(user.joiningDate);
-                                    const day = String(date.getDate()).padStart(2, '0');
-                                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                                    const year = date.getFullYear();
-                                    return `${day}-${month}-${year}`;
-                                  })()
-                                  : ''}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                      </div>
+
                       {totalItemsStudent > 10 && (
                         <div className="pagination mt-3 d-flex justify-content-center">
                           <span className="align-self-center me-3">
@@ -478,6 +457,7 @@ export default function BatchSummary() {
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>

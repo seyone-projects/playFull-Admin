@@ -127,6 +127,14 @@ export default function BatchList() {
                               <Link to={`/batch/manage/${batch._id}`} className='btn btn-sm btn-primary'>
                                 <FontAwesomeIcon icon="fa-solid fa-pen-to-square" />
                               </Link>&nbsp;
+                              {batch?.fee > 0 && (
+                                <><br></br>                                 
+                                  <Link to={`/batch-fee-scheme/manage/${batch._id}`} className='btn btn-sm btn-danger' style={{ marginTop: '5px' }}>
+                                    <FontAwesomeIcon icon="fa-solid fa-wallet" /> Fee Scheme
+                                  </Link>
+                                  &nbsp;
+                                </>
+                              )}
                               <Link to={`/batch-student/manage/${batch._id}`} className='btn btn-sm btn-warning'>
                                 <FontAwesomeIcon icon="fa-solid fa-user-plus" /> Add Students
                               </Link>
@@ -137,15 +145,13 @@ export default function BatchList() {
                                 <><br></br>
                                   <Link to={`/batch/summary/manage/${batch.trainerId._id}/${batch._id}`} className='btn btn-sm btn-dark' style={{ marginTop: '5px' }}>
                                     <FontAwesomeIcon icon="fa-solid fa-coins" /> Fee Summary
-                                  </Link>&nbsp;
-                                  <Link to={`/batch-fee-scheme/manage/${batch._id}`} className='btn btn-sm btn-danger' style={{ marginTop: '5px' }}>
-                                    <FontAwesomeIcon icon="fa-solid fa-wallet" /> Fee Scheme
-                                  </Link>
+                                  </Link> 
+                                 </>
+                              )}     &nbsp;                           
                                    <Link to={`/batch/overview/manage/${batch._id}`} className='btn btn-sm btn-info' style={{ marginTop: '5px' }}>
                                     <FontAwesomeIcon icon="fa-solid fa-book" /> Batch Summary
                                   </Link>
-                                </>
-                              )}
+                               
                             </td>
                           </tr>
                         ))}

@@ -7,8 +7,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GetUsersByBatchId, UpdateUsers, DeleteUser, GetById } from '../../service/BatchService';
 import { GetUsersByRole } from '../../service/UserService';
 import { GetByBatchId } from '../../service/FeeSchemeService';
-import { Add } from '../../service/BatchStudentService';
-import { Add as AddPayment } from '../../service/BatchStudentPaymentService';
+import { Add, GetByBatchId as GetByBatchIdBatchStudent, DeleteStudent } from '../../service/BatchStudentService';
+
 
 export default function BatchStudentList() {
   const {
@@ -40,6 +40,8 @@ export default function BatchStudentList() {
 
   const [batchDetails, setBatchDetails] = useState({});
 
+  const [batchStudents, setBatchStudents] = useState([]);
+
   const fetchBatchDetails = async () => {
     try {
       setIsLoading(true);
@@ -63,8 +65,8 @@ export default function BatchStudentList() {
   const fetchBatchStudentList = async (page = 1) => {
     try {
       setIsLoading(true);
-      const response = await GetUsersByBatchId(id, page, itemsPerPage);
-      setUsers(response.users);
+      const response = await GetByBatchIdBatchStudent(id, page, itemsPerPage);
+      setBatchStudents(response.batchStudents);
       setCurrentPage(response.currentPage);
       setTotalPages(response.totalPages);
       setTotalItems(response.totalItems);
@@ -143,16 +145,24 @@ export default function BatchStudentList() {
       console.log("UpdateUsers response:", response);
 
       if (response.status === 200) {
-        // Call Add once with all selectedUserIds
-        let addResponse = await Add(id, selectedUserIds, feeSchemeId);
-        console.log("Add response:", addResponse);
-
-        setAppError(true);
-        setAppErrorTitle("Action Response");
-        setAppErrorMessage(
-          addResponse.message || "Student(s) Successfully Added with Payments"
-        );
-        setAppErrorMode("success");
+        let addResponse;
+        if (batchDetails?.fee > 0 && feeSchemes.length > 0 && feeSchemeId) {
+          addResponse = await Add(id, selectedUserIds, feeSchemeId);
+          setAppError(true);
+          setAppErrorTitle("Action Response");
+          setAppErrorMessage(
+            addResponse.message || "Student(s) Successfully Added with Payments"
+          );
+          setAppErrorMode("success");
+        } else {
+          addResponse = await Add(id, selectedUserIds, null);
+          setAppError(true);
+          setAppErrorTitle("Action Response");
+          setAppErrorMessage(
+            addResponse.message || "Student(s) Successfully Added with Payments"
+          );
+          setAppErrorMode("success");
+        }
 
         // refresh page after success
         window.location.href = "/batch-student/manage/" + id;
@@ -179,7 +189,7 @@ export default function BatchStudentList() {
   const handleDeleteUser = async (userId) => {
     const confirmed = window.confirm("Are you sure you want to remove this student?");
     if (confirmed) {
-      const result = await DeleteUser(id, userId);
+      const result = await DeleteStudent(id, userId);
       if (result.status === 200) {
         setAppError(true);
         setAppErrorTitle("Success");
@@ -287,25 +297,24 @@ export default function BatchStudentList() {
                       </select>
                     </div>
                     {batchDetails?.fee > 0 && (
-                      <div className='col-lg-5 col-md-5 col-sm-6 col-12'>
-                        <div className="mb-3">
-                          <label className="form-label">Fee Scheme</label>
-                          <select
-                            className="form-control"
-                            required
-                            value={feeSchemeId}
-                            onChange={(e) => setFeeSchemeId(e.target.value)}
-                          >
-                            <option value="">Select Fee Scheme</option>
-                            {feeSchemes.map(feeSchemeOption => (
-                              <option key={feeSchemeOption._id} value={feeSchemeOption._id}>
-                                {feeSchemeOption.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                      <div className="form-group col-md-4">
+                        <label>Fee Scheme</label>
+                        <select
+                          className="form-control"
+                          required
+                          value={feeSchemeId}
+                          onChange={(e) => setFeeSchemeId(e.target.value)}
+                        >
+                          <option value="">-- Select Fee Scheme --</option>
+                          {feeSchemes.map((scheme) => (
+                            <option key={scheme._id} value={scheme._id}>
+                              {scheme.name}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     )}
+
                     <div className='col-lg-2 col-md-2 col-sm-12 d-flex align-items-end'>
                       <button type='submit' className='btn btn-success-app btn-md'> <i className="ri-check-fill"></i> Add Student </button>
                     </div>
@@ -327,48 +336,57 @@ export default function BatchStudentList() {
                         </tr>
                       </thead>
                       <tbody>
-                        {users && users.map((user) => (
-                          <tr key={user._id}>
-                            <td>
-                              <img
-                                src={`${config.imageBasePath}/users/${user._id}.${user.image || 'jpg'}`}
-                                alt={user.username}
-                                className='img-fluid image-xs'
-                              />
-                            </td>
-                            <td>{user.username}</td>
-                            <td>{user.email}</td>
-                            <td>{user.mobile}</td>
-                            <td>
-                              {user.joiningDate
-                                ? (() => {
-                                  const date = new Date(user.joiningDate);
-                                  const day = String(date.getDate()).padStart(2, '0');
-                                  const month = String(date.getMonth() + 1).padStart(2, '0');
-                                  const year = date.getFullYear();
-                                  return `${day}-${month}-${year}`;
-                                })()
-                                : ''}
-                            </td>
-                            <td>{user.status}</td>
-                            <td> <button
-                              className='btn btn-sm btn-danger'
-                              onClick={() => handleDeleteUser(user._id)}
-                            >
-                              <FontAwesomeIcon icon="fa-solid fa-trash" /> Delete
-                            </button>
-                              {batchDetails?.fee > 0 && (
-                                <>
-                                  &nbsp;&nbsp;
-                                  <Link to={`/batch-student-fee/manage/${user._id}/${id}`} className='btn btn-sm btn-success'>
-                                    <FontAwesomeIcon icon="fa-solid fa-wallet" /> Fees
-                                  </Link>
-                                </>
-                              )}
+                        {batchStudents && batchStudents.length > 0 ? (
+                          batchStudents.map((batchStudent) => (
+                            <tr key={batchStudent.userId._id}>
+                              <td>
+                                <img
+                                  src={`${config.imageBasePath}/users/${batchStudent.userId._id}.${batchStudent.userId.image || 'jpg'}`}
+                                  alt={batchStudent.userId.username}
+                                  className='img-fluid image-xs'
+                                />
+                              </td>
+                              <td>{batchStudent.userId.username}</td>
+                              <td>{batchStudent.userId.email}</td>
+                              <td>{batchStudent.userId.mobile}</td>
+                              <td>
+                                {batchStudent.userId.joiningDate
+                                  ? (() => {
+                                    const date = new Date(batchStudent.userId.joiningDate);
+                                    const day = String(date.getDate()).padStart(2, '0');
+                                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                                    const year = date.getFullYear();
+                                    return `${day}-${month}-${year}`;
+                                  })()
+                                  : ''}
+                              </td>
+                              <td>{batchStudent.userId.status}</td>
+                              <td> <button
+                                className='btn btn-sm btn-danger'
+                                onClick={() => handleDeleteUser(batchStudent.userId._id)}
+                              >
+                                <FontAwesomeIcon icon="fa-solid fa-trash" /> Delete
+                              </button>
+                                {batchDetails?.fee > 0 && (
+                                  <>
+                                    &nbsp;&nbsp;
+                                    <Link to={`/batch-student-fee/manage/${batchStudent.userId._id}/${id}/${batchStudent._id}`} className='btn btn-sm btn-success'>
+                                      <FontAwesomeIcon icon="fa-solid fa-wallet" /> Fees
+                                    </Link>
+                                  </>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="7" className="text-center">
+                              No students mapped in this batch.
                             </td>
                           </tr>
-                        ))}
+                        )}
                       </tbody>
+
                     </table>
                   </div>
                   {totalItems > 10 && (
