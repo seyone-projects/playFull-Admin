@@ -31,6 +31,41 @@ const GetAllLessonPlanner = async (page, limit, keyword) => {
     }
 }
 
+//get today's lesson planners with pagination
+const GetTodayLessonPlanners = async (page, limit) => {
+    try {
+        const token = localStorage.getItem("oojwt");
+        const response = await axios.get(`${config.apiUrl}lessonPlanners/today?page=${page}&limit=${limit}`,
+            {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+        
+        if (response.status === 200) {
+            return {
+                status: 200,
+                lessonPlanners: response.data.lessonPlanners,
+                totalPages: response.data.totalPages,
+                currentPage: response.data.currentPage,
+                totalItems: response.data.totalItems
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        if (error.response.status === 401) {
+            return {
+                status: 401,
+                message: error.response.data.message
+            };
+        }
+        return {
+            status: 400,
+            message: error.response.data.message
+        };
+    }
+}
+
 const GetById = async (id) => {
     try {
         const token = localStorage.getItem("oojwt");
@@ -172,4 +207,4 @@ const GetByBatchId = async (batchId, page, limit) => {
     }
 }
 
-export { Add, Update, GetById, GetAllLessonPlanner, GetByBatchId };
+export { Add, Update, GetById, GetAllLessonPlanner, GetByBatchId, GetTodayLessonPlanners };
