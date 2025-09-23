@@ -5,7 +5,7 @@ import config from '../../config';
 import { useGlobalContext } from '../../GlobalContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GetAll } from '../../service/BatchService';
-import { GetAllLessonPlanner } from '../../service/LessonPlannerService';
+import { GetTodayLessonPlanners } from '../../service/LessonPlannerService';
 import { GetUsersByRole } from '../../service/UserService';
 import { GetAll as GetAllCourses } from '../../service/CourseService';
 import { GetUsersByBatchId } from '../../service/BatchService';
@@ -226,7 +226,7 @@ function Dashboard() {
   const fetchLessonPlanners = async (page = 1) => {
     try {
       setIsLoading(true);
-      const response = await GetAllLessonPlanner(page, itemsPerPage, '');
+      const response = await GetTodayLessonPlanners(page, itemsPerPage, '');
       setLessonPlanners(response.lessonPlanners);
       setCurrentPage(response.currentPage);
       setTotalPages(response.totalPages);

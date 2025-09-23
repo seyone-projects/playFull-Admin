@@ -187,8 +187,49 @@ const GetMonthlySummaryReport = async (month, year) => {
 };
 
 
+//get all batchstudentpayments reports by fromdate, todate, user mobile
+const GetSearchPaymentsbyMobileReport = async (fromDate, toDate, mobile) => {
+    try {
+        const token = localStorage.getItem("oojwt");
+        const response = await axios.get(
+            `${config.apiUrl}batchStudentPayments/search-payment-by-mobile?fromDate=${fromDate}&toDate=${toDate}&mobile=${mobile}`,
+            {
+                headers: { 'Authorization': 'Bearer ' + token }
+            }
+        );
 
-export { Update, GetCollectionReports, GetPendingReports, GetPaymentsByBatchStudentId, GetMonthlySummaryReport };
+        if (response.status === 200) {
+            const d = response.data.data;
+            return {
+                status: 200,
+                message: response.data.message,
+                payments: d.payments.map(payment => ({
+                    batchName: payment.batchName,
+                    batchCode: payment.batchCode,
+                    studentname: payment.studentname,
+                    paymentDateTime: payment.paymentDateTime,
+                    paymentReference: payment.paymentReference,
+                    paidAmount: payment.paidAmount,      
+                    pendingAmount: payment.pendingAmount
+                })),
+                totalItems: d.totalItems,
+                totalPages: d.totalPages,
+                currentPage: d.currentPage,
+                totalPaidAmount: d.summary.totalPaid,     
+                totalPendingAmount: d.summary.totalPending
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            status: 400,
+            message: error?.response?.data?.message || "Something went wrong"
+        };
+    }
+}
+
+
+export { Update, GetCollectionReports, GetPendingReports, GetPaymentsByBatchStudentId, GetMonthlySummaryReport, GetSearchPaymentsbyMobileReport };
 
 
 

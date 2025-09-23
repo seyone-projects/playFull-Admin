@@ -53,25 +53,29 @@ import StudentList from "./components/master/StudentList";
 import UserEdit from "./components/user/UserEdit";
 import UserPasswordUpdate from "./components/user/UserPasswordUpdate";
 import AttendanceNew from "./components/attendance/AttendanceNew";
-import ReportStudentPayment from "./components/reports/StudentPaymentReports"; 
 import BatchFeeSchemeList from "./components/master/BatchFeeSchemeList";
 import FeeSchemePaymentList from "./components/master/FeeSchemePaymentList";
 import BatchFeeSchemeEdit from "./components/fee-scheme/BatchFeeSchemeEdit";
 import FeeSchemePaymentEdit from "./components/fee-scheme-payment/FeeSchemePaymentEdit";
 import BatchOverview from "./components/batch/BatchOverview";
 import UserKyc from "./components/user/UserKyc";
+import ReportStudentPayment from "./components/reports/StudentPaymentReports"; 
 import ReportStudentCollectionPayment from "./components/reports/StudentCollectionPaymentReports";
 import ReportStudentPendingPayment from "./components/reports/StudentPendingPaymentReports";
 import ReportBatchAttendance from "./components/reports/AttendanceBatchWiseReports";
 import ReportStudentAttendance from "./components/reports/AttendanceStudentWiseReports";
 import ReportLessonPlannerAttendance from "./components/reports/AttendanceLessonPlannerWiseReports";
+import ReportMonthlyAttendance from "./components/reports/AttendanceMonthlyReports";
+import ReportMonthlyPayment from "./components/reports/PaymentMonthlyReports";
 import BatchStudentPaymentUpdate from "./components/batchStudentPayment/PaymentUpdate";
 import LessonPlannerScreenshots from "./components/lesson-planner/LessonPlannerScreenshots";
 import LeaveRequestList from "./components/leave-request/LeaveRequestList";
 import LeaveRequestUpdate from "./components/leave-request/LeaveRequestUpdate";
-import ReportMonthlyAttendance from "./components/reports/AttendanceMonthlyReports";
-import ReportMonthlyPayment from "./components/reports/PaymentMonthlyReports";
 import SingleSignin from "./components/general/SingleSignin";
+import ReportStudentPaymentbyMobile from "./components/reports/StudentPaymentbyMobileReports";
+import PageNew from "./components/page/PageNew";
+import PageList from "./components/master/PageList";
+
 
 function App() {
   library.add(fas); 
@@ -248,10 +252,16 @@ function App() {
                 <Route path="/report/lessonplanner/attendance" element={<ReportLessonPlannerAttendance />} />
                 <Route path="/report/monthly/attendance" element={<ReportMonthlyAttendance />} />
                 <Route path="/report/monthly/payment" element={<ReportMonthlyPayment />} />
+                <Route path="/report/student/search/payment" element={<ReportStudentPaymentbyMobile />} />
 
                 {/* leave request */}
                 <Route path="/leave-request/list" element={<LeaveRequestList />} />
                 <Route path="/leave-request/manage/:id/:batchId/:lessonPlannerId" element={<LeaveRequestUpdate />} />
+
+                {/* page */}
+                <Route path="/page/manage" element={<PageNew />} />
+                <Route path="/page/list" element={<PageList />} />
+                <Route path="/page/manage/:id" element={<PageNew />} />
 
                 {/* 404 Page */}   
                  <Route path="*"  element={<Dashboard />} />          

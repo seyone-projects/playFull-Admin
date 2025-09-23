@@ -167,20 +167,20 @@ export default function ReportMonthlyPayments() {
                                       <tr key={batch.id + "-" + user.id}>
                                         <td></td>
                                         <td>{user.name}</td>
-                                        <td className="fw-bold">{user.totalFee}</td>
-                                        <td className="text-success fw-bold">{user.totalPaid}</td>
-                                        <td className="text-danger fw-bold">{user.totalPending}</td>
+                                        <td className="fw-bold text-end">{user.totalFee}</td>
+                                        <td className="text-success fw-bold text-end">{user.totalPaid}</td>
+                                        <td className="text-danger fw-bold text-end">{user.totalPending}</td>
                                       </tr>
                                     ))}
 
                                     {/* Batch Totals Row */}
                                     <tr className="table-secondary">
                                       <td colSpan="2" className="fw-bold text-end">
-                                        Batch Totals:
+                                        Batch Totals
                                       </td>
-                                      <td className="fw-bold">{batch.overallTotalFee}</td>
-                                      <td className="text-success fw-bold">{batch.overallTotalPaid}</td>
-                                      <td className="text-danger fw-bold">{batch.overallTotalPending}</td>
+                                      <td className="fw-bold text-end">{batch.overallTotalFee}</td>
+                                      <td className="text-success fw-bold text-end">{batch.overallTotalPaid}</td>
+                                      <td className="text-danger fw-bold text-end">{batch.overallTotalPending}</td>
                                     </tr>
                                   </>
                                 ) : (
