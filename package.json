@@ -44,7 +44,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",    
-    "build:develop": "vite build --mode develop",
+    "build:develop": "build --mode develop",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
