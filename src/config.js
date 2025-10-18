@@ -1,17 +1,17 @@
 // src/config.js
 const applicationMode = "development";
 var appName = "Admin Panel";
-var apiUrl = "https://playfulpencil.in/api/";
+var apiUrl = "https://api.playfulpencil.in/api/";
 var pageSize = 10;
 var logo = "/logo.png";
-var imageBasePath = "https://playfulpencil.in/uploads";
+var imageBasePath = "https://api.playfulpencil.in/uploads";
 
 if (applicationMode === 'development') {
   appName = "Admin Panel";
   
   //local
-  apiUrl = "https://playfulpencil.in/api/"; 
-  imageBasePath = "https://playfulpencil.in/uploads";  
+  apiUrl = "https://api.playfulpencil.in/api/"; 
+  imageBasePath = "https://api.playfulpencil.in/uploads";  
 
   //server
   //apiUrl = "http://13.53.39.107/api/";
