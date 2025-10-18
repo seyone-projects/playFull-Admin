@@ -75,7 +75,9 @@ import SingleSignin from "./components/general/SingleSignin";
 import ReportStudentPaymentbyMobile from "./components/reports/StudentPaymentbyMobileReports";
 import PageNew from "./components/page/PageNew";
 import PageList from "./components/master/PageList";
-
+import DemoRegisterList from "./components/master/DemoRegisterList";
+import DemoRegisterView from "./components/demo-register/DemoRegisterView";
+import UserCourse from "./components/master/UserCourseList";
 
 function App() {
   library.add(fas); 
@@ -192,6 +194,7 @@ function App() {
                 <Route path="/user/manage/edit/:id" element={<UserEdit />} />
                 <Route path="/user/manage/password/:id" element={<UserPasswordUpdate />} />
                 <Route path="/user/manage/kyc/:id" element={<UserKyc />} />
+                <Route path="/user/manage/course/:id" element={<UserCourse />} />
                 
                 {/* section */}
                 <Route path="/section/manage" element={<SectionNew />} />
@@ -262,6 +265,12 @@ function App() {
                 <Route path="/page/manage" element={<PageNew />} />
                 <Route path="/page/list" element={<PageList />} />
                 <Route path="/page/manage/:id" element={<PageNew />} />
+
+                {/* demo registration */ }
+                <Route path="/demo-registration/list" element={<DemoRegisterList />} />
+                <Route path="/demo-registration/manage/:id" element={<DemoRegisterView />} />
+
+               
 
                 {/* 404 Page */}   
                  <Route path="*"  element={<Dashboard />} />          

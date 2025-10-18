@@ -57,7 +57,7 @@ const GetById = async (id) => {
 }
 
 //create a function to send the name and image to axios post to save the course
-const Add = async (categoryId, subCategoryIds, name, image) => {
+const Add = async (categoryId, subCategoryIds, name, image, description) => {
     try {
         const data = new FormData();
         data.append("categoryId", categoryId);
@@ -69,6 +69,7 @@ const Add = async (categoryId, subCategoryIds, name, image) => {
         
         data.append("name", name);
         data.append("image", image);
+        data.append("description", description);
 
         console.log("Image in service : " + image);
 
@@ -98,7 +99,7 @@ const Add = async (categoryId, subCategoryIds, name, image) => {
     }
 }
 
-const Update = async (id, categoryId, subCategoryIds, name, image, status) => {
+const Update = async (id, categoryId, subCategoryIds, name, image, status, description) => {
     try {
         const data = new FormData();
         data.append("id", id);
@@ -110,6 +111,7 @@ const Update = async (id, categoryId, subCategoryIds, name, image, status) => {
         data.append("name", name);
         data.append("image", image);
         data.append("status", status);
+        data.append("description", description);
 
         console.log("Image in service : " + image);
 

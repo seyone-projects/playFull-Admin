@@ -78,7 +78,6 @@ export default function CategoryList() {
                     </div>
                   </div>
                 </form>
-
                 <div className='table-content'>
                   <div className="mobile-scroll">
                     <table className='table table-bordered table-condensed'>

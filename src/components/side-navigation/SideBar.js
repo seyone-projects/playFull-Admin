@@ -257,6 +257,13 @@ function SideBar() {
                             </li>
                         </ul>
                     </li>
+                    <hr></hr>
+                    <li className='nav-item'>
+                        <Link className='nav-link' to='/demo-registration/list'>
+                            <i className='bi bi-grid'></i>
+                            <span>Demo Registration</span>
+                        </Link>
+                    </li>
                 </ul>
             </aside>
         </>

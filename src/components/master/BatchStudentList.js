@@ -386,7 +386,6 @@ export default function BatchStudentList() {
                           </tr>
                         )}
                       </tbody>
-
                     </table>
                   </div>
                   {totalItems > 10 && (

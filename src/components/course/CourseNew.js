@@ -18,6 +18,7 @@ export default function CourseNew() {
     const [name, setName] = useState('');
     const [image, setImage] = useState(null);
     const [status, setStatus] = useState('active');
+    const [description, setDescription] = useState('');
     const { id } = useParams();
 
     const [categoryId, setCategoryId] = useState('');
@@ -77,6 +78,7 @@ export default function CourseNew() {
                 setStatus(response.course.status);
                 setCategoryId(response.course.categoryId);
                 setSubCategoryIds(response.course.subCategoryIds);
+                setDescription(response.course.description);
             }
         } catch (error) {
             setAppError(true);
@@ -134,15 +136,23 @@ export default function CourseNew() {
             return;
         }
 
+        //descrption required
+        if (!description) {
+            setAppError(true);
+            setAppErrorTitle("Error");
+            setAppErrorMessage("Description is required");
+            setAppErrorMode("error");
+            return;
+        }
         setIsLoading(true);
 
         try {
             let response = null;
 
             if (id === undefined) {
-                response = await Add(categoryId, subCategoryIds, name, image);
+                response = await Add(categoryId, subCategoryIds, name, image, description);
             } else {
-                response = await Update(id, categoryId, subCategoryIds, name, image, status);
+                response = await Update(id, categoryId, subCategoryIds, name, image, status, description);
                 console.log("update:", response);
             }
 
@@ -249,7 +259,17 @@ export default function CourseNew() {
                                                     )}
                                                 </div>
                                             </div>
-                                            {id && (
+                                            <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
+                                                <div className="mb-3">
+                                                    <label className="form-label">Description</label>
+                                                    <textarea
+                                                        className='form-control'
+                                                        value={description}
+                                                        onChange={(e) => setDescription(e.target.value)}
+                                                        rows={4}
+                                                    />
+                                                </div>
+                                            </div>                                                                                        {id && (
                                                 <div className='col-lg-3 col-md-3 col-sm-6 col-12'>
                                                     <div className="mb-3">
                                                         <label className="form-label">Status</label>
