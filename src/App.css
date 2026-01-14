@@ -1017,3 +1017,37 @@ h1, h2, h3, h4, h5, h6{
   background-color: rgb(241, 234, 234) !important;
   color: #000 !important;
 }
+
+
+/* Fix CKEditor focus overlap */
+.ck-editor__editable {
+    min-height: 250px !important;
+    box-shadow: none !important;      /* removes blue outline */
+    border: 1px solid #ccc !important;
+    padding: 10px !important;
+}
+
+/* Prevent editor wrapper from expanding */
+.ck-editor {
+    width: 100% !important;
+    overflow: hidden !important;
+}
+
+/* Prevent main area from overflow when clicked */
+.ck-editor__main {
+    overflow: auto !important;
+}
+
+/* Keep CKEditor toolbar inside its parent container */
+.ck-editor__top {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Prevent toolbar from floating over menu */
+.ck-sticky-panel__content {
+    position: relative !important;
+    top: 0 !important;
+    z-index: 1 !important;
+}
+
