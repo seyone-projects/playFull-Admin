@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import config from '../../config';
 //import globalcontext
 import { useGlobalContext } from '../../GlobalContext';
@@ -110,6 +112,13 @@ export default function CourseNew() {
             fetchCourseById();
         }
     }, []);
+
+    React.useEffect(() => {
+        if (course && course.subCategoryIds) {
+            setSubCategoryIds(course.subCategoryIds);
+        }
+    }, [course]);
+
 
     const handleFileChange = (event) => {
         setImage(event.target.files[0]);
@@ -237,6 +246,7 @@ export default function CourseNew() {
                                                             <option key={categoryOption._id} value={categoryOption._id}>
                                                                 {categoryOption.name}
                                                             </option>
+
                                                         ))}
                                                     </select>
                                                 </div>
@@ -259,17 +269,46 @@ export default function CourseNew() {
                                                     )}
                                                 </div>
                                             </div>
+
+
                                             <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
                                                 <div className="mb-3">
                                                     <label className="form-label">Description</label>
-                                                    <textarea
-                                                        className='form-control'
-                                                        value={description}
-                                                        onChange={(e) => setDescription(e.target.value)}
-                                                        rows={4}
-                                                    />
+                                                    {description !== null && (
+                                                        <CKEditor
+                                                            editor={ClassicEditor}
+                                                            data={description || ""}
+                                                            onChange={(event, editor) => setDescription(editor.getData())}
+                                                            config={{
+                                                                toolbar: [
+                                                                    "bold",
+                                                                    "italic",
+                                                                    "link",
+                                                                    "bulletedList",
+                                                                    "numberedList",
+                                                                    "|",
+                                                                    "undo",
+                                                                    "redo"
+                                                                ],
+                                                                removePlugins: [
+                                                                    "CKFinder",
+                                                                    "CKBox",
+                                                                    "EasyImage",
+                                                                    "ImageUpload",
+                                                                    "MediaEmbed",
+                                                                    "Table",
+                                                                    "TableToolbar",
+                                                                    "BlockQuote",
+                                                                    "ListStyle",
+                                                                    "CloudServices"
+                                                                ]
+                                                            }}
+                                                        />
+                                                    )}
                                                 </div>
-                                            </div>                                                                                        {id && (
+                                            </div>
+
+                                            {id && (
                                                 <div className='col-lg-3 col-md-3 col-sm-6 col-12'>
                                                     <div className="mb-3">
                                                         <label className="form-label">Status</label>
