@@ -1,10 +1,8 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
-
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import config from '../../config';
 //import globalcontext
 import { useGlobalContext } from '../../GlobalContext';
@@ -30,7 +28,6 @@ export default function CourseNew() {
 
     const [subCategoryIds, setSubCategoryIds] = useState([]);
     const [subCategorys, setSubCategorys] = useState([]);
-
 
     const FetchCategory = async () => {
         setIsLoading(true);
@@ -278,15 +275,32 @@ export default function CourseNew() {
                                                 <div className="mb-3">
                                                     <label className="form-label">Description</label>
                                                     {description !== null && (
-                                                        <ReactQuill
-                                                            theme="snow"
-                                                            style={{ height: "200px", marginBottom: "40px" }}
-                                                            value={description || ""}
-                                                            onChange={(value) => setDescription(value)}
-                                                            modules={{
+                                                        <CKEditor
+                                                            editor={ClassicEditor}
+                                                            data={description || ""}
+                                                            onChange={(event, editor) => setDescription(editor.getData())}
+                                                            config={{
                                                                 toolbar: [
-                                                                    ["bold", "italic", "underline"],
-                                                                    [{ list: "ordered" }, { list: "bullet" }],                                                                    
+                                                                    "bold",
+                                                                    "italic",
+                                                                    "link",
+                                                                    "bulletedList",
+                                                                    "numberedList",
+                                                                    "|",
+                                                                    "undo",
+                                                                    "redo"
+                                                                ],
+                                                                removePlugins: [
+                                                                    "CKFinder",
+                                                                    "CKBox",
+                                                                    "EasyImage",
+                                                                    "ImageUpload",
+                                                                    "MediaEmbed",
+                                                                    "Table",
+                                                                    "TableToolbar",
+                                                                    "BlockQuote",
+                                                                    "ListStyle",
+                                                                    "CloudServices"
                                                                 ]
                                                             }}
                                                         />
