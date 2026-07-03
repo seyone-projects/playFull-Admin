@@ -123,17 +123,19 @@ export default function UserList() {
                             <td>{user.cityId?.name}</td>
                             <td>{user.status}</td>
                             <td>
-                              <Link to={`/user/manage/edit/${user._id}`} className='btn btn-sm btn-primary'>
+                              <Link to={`/user/manage/edit/${user._id}`} className='btn btn-sm btn-primary' title='Edit'>
                                 <FontAwesomeIcon icon="fa-solid fa-pen-to-square" />
                               </Link>
                               &nbsp;
-                              <Link to={`/user/manage/password/${user._id}`} className='btn btn-sm btn-warning'>
+                              <Link to={`/user/manage/password/${user._id}`} className='btn btn-sm btn-warning' title='Password'>
                                 <FontAwesomeIcon icon="fa-solid fa-key" />
                               </Link>
                               &nbsp;
-                              <Link to={`/user/manage/kyc/${user._id}`} className='btn btn-sm btn-info'>
+                              <Link to={`/user/manage/kyc/${user._id}`} className='btn btn-sm btn-info' title='KYC'>
                                 <FontAwesomeIcon icon="fa-solid fa-id-card" />
                               </Link>
+                              &nbsp;
+                              <Link to={`/user/manage/course/${user._id}`} className='btn btn-sm btn-dark' title='Course'> <FontAwesomeIcon icon="fa-solid fa-book" /></Link>
                             </td>
                           </tr>
                         ))}

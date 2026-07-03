@@ -129,7 +129,7 @@ const GetUserById = async (id) => {
 }
 
 //add user 
-const Add = async (cityId, genderId, username, email, mobile, whatsapp, password, image, role, joiningDate, parentMobile, parentEmail, parentWhatsapp, trainerPan, trainerAadhar, trainerPanImage, trainerAadharImage, trainerBankName, trainerBankAccountNumber, trainerBankIfscCode, trainerBankBranch) => {
+const Add = async (cityId, genderId, username, email, mobile, whatsapp, password, image, role, joiningDate, parentMobile, parentEmail, parentWhatsapp, trainerPan, trainerAadhar, trainerPanImage, trainerAadharImage, trainerBankName, trainerBankAccountNumber, trainerBankIfscCode, trainerBankBranch, educationProof, experienceProof) => {
     try {
         const token = localStorage.getItem("oojwt");
         const formData = new FormData();
@@ -154,7 +154,8 @@ const Add = async (cityId, genderId, username, email, mobile, whatsapp, password
         formData.append("trainerBankAccountNumber", trainerBankAccountNumber);
         formData.append("trainerBankIfscCode", trainerBankIfscCode);
         formData.append("trainerBankBranch", trainerBankBranch);
-        
+        formData.append("educationProof", educationProof);
+        formData.append("experienceProof", experienceProof);        
 
         const response = await axios.post(config.apiUrl + 'users/add', formData, {
             headers: {
@@ -293,5 +294,36 @@ const UpdatePassword = async (id, oldPassword, newPassword) => {
 }
 
 
+//Get redirect URL based on role
+const GetRedirectUrl = async (mobile) => {
+    try {
+        const data = new FormData();
+        data.append("mobile", mobile);
 
-export { UserLogin, LoggedUserDetail, GetUsersByRole, GetUserById, Add, Update, UpdateMemberPassword, UpdatePassword};
+        const response = await axios.post(config.apiUrl + 'users/single-signin-redirect-url', data, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log("response redirect url: ", response);
+        if (response.status === 200) {
+            return {
+                status: 200,
+                message: response.data.message,
+                redirectUrl: response.data.redirectUrl,
+                role: response.data.role
+            };
+        }
+
+    } catch (error) {
+        console.error(error);
+        return {
+            status: 400,
+            message: error.response?.data?.message || "Error getting redirect URL"
+        };
+    }
+}
+
+
+
+export { UserLogin, LoggedUserDetail, GetUsersByRole, GetUserById, Add, Update, UpdateMemberPassword, UpdatePassword, GetRedirectUrl};

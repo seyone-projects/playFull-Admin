@@ -14,7 +14,7 @@ export default function Logo() {
                     <span className='d-none d-lg-block'> Oonovoo Admin </span>
                     */}
                     <img src={config.logo} alt="My Logo" />
-                    <span className='d-none d-lg-block'> Playful Admin </span>
+                    <span className='d-none d-lg-block'> Admin Panel </span>
                 </Link>
                 <i className='bi bi-list toggle-sidebar-btn' onClick={handleToggleSidebar}>
                 </i>

@@ -5,11 +5,12 @@ import config from '../../config';
 import { useGlobalContext } from '../../GlobalContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GetAll } from '../../service/BatchService';
-import { GetAllLessonPlanner } from '../../service/LessonPlannerService';
+import { GetTodayLessonPlanners } from '../../service/LessonPlannerService';
 import { GetUsersByRole } from '../../service/UserService';
 import { GetAll as GetAllCourses } from '../../service/CourseService';
-import { GetAll as GetAllPayments } from '../../service/PaymentService';
 import { GetUsersByBatchId } from '../../service/BatchService';
+import { GetByBatchId as GetByBatchIdBatchStudent } from '../../service/BatchStudentService';
+import { GetPaymentsByBatchStudentId } from '../../service/BatchStudentPaymentService';
 
 // Chart.js
 import { Pie, Bar } from 'react-chartjs-2';
@@ -60,6 +61,10 @@ function Dashboard() {
     datasets: [],
   });
 
+  const [totalToBeReceived, setTotalToBeReceived] = useState(0);
+  const [amountPaid, setAmountPaid] = useState(0);
+  const [balance, setBalance] = useState(0);
+  const [total, setTotal] = useState(0);
   const itemsPerPage = 10;
 
   // Simulated Fee Summary Data
@@ -75,122 +80,117 @@ function Dashboard() {
   });
 
 
-  const fetchPayments = async (page) => {
+  const fetchPayments = async () => {
     try {
-      const response = await GetAllPayments(page, 9999, "");
-      if (response.status === 200) {
-        setPayments(response.payments);
+      const batchResponse = await GetAll(1, 9999, '');
+      const batches = batchResponse?.batchs || [];
 
-        let totalPaid = response.totalPaidAmount || 0;
+      let totalToBeReceived = 0;
+      let totalPaid = 0;
+      let batchNames = [];
+      let batchAmounts = [];
+      const timelineMap = {};
 
-        // Fetch all batches
-        const batchResponse = await GetAll(1, 9999, '');
-        const batches = batchResponse?.batchs || [];
+      const today = new Date();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-        let totalToBeReceived = 0;
-        let allStudents = [];
-
-        // For each batch, fetch students and compute expected fee
-        for (const batch of batches) {
-          const studentRes = await GetUsersByBatchId(batch._id, 1, 9999);
-          const students = studentRes?.users || [];
-
-          const batchFee = parseFloat(batch.fee || 0);
-          const receivedPerBatch = students.length * batchFee;
-
-          totalToBeReceived += receivedPerBatch;
-
-          console.log(`Batch: ${batch.name}, Fee: ${batchFee}, Students: ${students.length}, Total to be received: ${receivedPerBatch}`);
-        }
-
-        const pending = totalToBeReceived - totalPaid;
-
-        setFeeSummary({
-          total: totalToBeReceived,
-          paid: totalPaid,
-          balance: pending
-        });
-
-        //bar chart
-        const today = new Date();
-        const currentMonth = today.getMonth();
-        const currentYear = today.getFullYear();
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-        const timelineMap = {};
-
-        // Initialize all dates of the current month with 0
-        for (let day = 1; day <= daysInMonth; day++) {
-          const date = new Date(currentYear, currentMonth, day).toLocaleDateString("en-CA"); // ✅ this creates dates like '2025-08-01', etc.
-          timelineMap[date] = 0;
-        }
-
-        // Add payments to timelineMap
-        response.payments.forEach(payment => {
-          const createdAt = new Date(payment.paymentDateTime);
-          const paymentMonth = createdAt.getMonth();
-          const paymentYear = createdAt.getFullYear();
-
-          if (paymentMonth === currentMonth && paymentYear === currentYear) {
-            const date = createdAt.toISOString().split("T")[0]; // YYYY-MM-DD
-            const amount = parseFloat(payment.amount || 0);
-            timelineMap[date] += amount;
-          }
-        });
-
-        const sortedDates = Object.keys(timelineMap).sort(); // Sort the dates
-        const sortedValues = sortedDates.map(date => timelineMap[date]);
-        // Now pass `labels` and `data` to your bar chart
-        setTimelineChartData({
-          labels: sortedDates,
-          datasets: [
-            {
-              label: " Fee Received",
-              data: sortedValues,
-              fill: false,
-              borderColor: "#4bc0c0",
-              backgroundColor: "#4bc0c0",
-              tension: 0.1
-            }
-          ]
-        });
-
-
-        let batchNames = [];
-        let batchAmounts = [];
-
-        for (const batch of batches) {
-          const studentRes = await GetUsersByBatchId(batch._id, 1, 9999);
-          const students = studentRes?.users || [];
-
-          const batchFee = parseFloat(batch.fee || 0);
-          const totalReceived = students.length * batchFee;
-
-          // ✅ Skip if total fee for this batch is 0
-          if (totalReceived > 0) {
-            batchNames.push(batch.name);
-            batchAmounts.push(totalReceived);
-          }
-
-          totalToBeReceived += totalReceived;
-        }
-
-        setBatchWiseFeeData({
-          labels: batchNames,
-          datasets: [
-            {
-              label: ' Fee Per Batch',
-              data: batchAmounts,
-              backgroundColor: batchNames.map((_, i) => `hsl(${(i * 50) % 360}, 70%, 60%)`),
-              borderWidth: 1,
-            }
-          ]
-        });
+      // Initialize timeline map
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth, day).toISOString().split("T")[0];
+        timelineMap[date] = 0;
       }
+
+      for (const batch of batches) {
+        const batchStudentRes = await GetByBatchIdBatchStudent(batch._id, 1, 9999);
+        const batchStudents = batchStudentRes?.batchStudents || [];
+
+        let batchTotalPaid = 0;
+        let batchTotalToBeReceived = 0;
+
+        for (const batchStudent of batchStudents) {
+          const paymentsRes = await GetPaymentsByBatchStudentId(batchStudent._id, 1, 9999);
+          const payments = paymentsRes?.payments || [];
+
+          // Sum all payments for this student
+          const studentPaid = payments.reduce((sum, p) => {
+            const amt = p.amount ? parseFloat(String(p.amount).replace(/,/g, '')) : 0;
+            return sum + amt;
+          }, 0);
+
+          batchTotalPaid += studentPaid;
+
+          // Each student's fee = batch fee
+          const studentFee = batch.fee ? parseFloat(String(batch.fee).replace(/,/g, '')) : 0;
+          batchTotalToBeReceived += studentFee;
+
+          // Timeline chart
+          payments.forEach(payment => {
+            if (!payment.paymentDateTime) return;
+            const createdAt = new Date(payment.paymentDateTime);
+            if (createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear) {
+              const date = createdAt.toISOString().split("T")[0];
+              const amt = payment.amount ? parseFloat(String(payment.amount).replace(/,/g, '')) : 0;
+              timelineMap[date] += amt;
+            }
+          });
+        }
+
+        // Add all batches to batch-wise chart even if no payments
+        batchNames.push(batch.name || 'Unnamed Batch');
+        batchAmounts.push(batchTotalPaid);
+
+        // Add to overall totals
+        totalPaid += batchTotalPaid;
+        console.log("total paid", totalPaid);
+        totalToBeReceived += batchTotalToBeReceived;
+      }
+
+      const overallBalance = totalToBeReceived - totalPaid;
+
+      // Set overall fee summary
+      setFeeSummary({
+        total: totalToBeReceived,
+        paid: totalPaid,
+        balance: overallBalance
+      });
+
+      // Batch-wise Pie chart
+      setBatchWiseFeeData({
+        labels: batchNames,
+        datasets: [
+          {
+            label: ' Fee Per Batch',
+            data: batchAmounts,
+            backgroundColor: batchNames.map((_, i) => `hsl(${(i * 50) % 360}, 70%, 60%)`),
+            borderWidth: 1,
+          }
+        ]
+      });
+
+      // Timeline chart
+      const sortedDates = Object.keys(timelineMap).sort();
+      const sortedValues = sortedDates.map(date => timelineMap[date]);
+      setTimelineChartData({
+        labels: sortedDates,
+        datasets: [
+          {
+            label: " Fee Received",
+            data: sortedValues,
+            fill: false,
+            borderColor: "#4bc0c0",
+            backgroundColor: "#4bc0c0",
+            tension: 0.1
+          }
+        ]
+      });
+
     } catch (error) {
-      console.log("Payment Fetch Error:", error);
+      console.log("BatchStudent Payment Fetch Error:", error);
     }
   };
+
 
   const feeData = {
     labels: ['Received', 'Pending'],
@@ -226,7 +226,7 @@ function Dashboard() {
   const fetchLessonPlanners = async (page = 1) => {
     try {
       setIsLoading(true);
-      const response = await GetAllLessonPlanner(page, itemsPerPage, '');
+      const response = await GetTodayLessonPlanners(page, itemsPerPage, '');
       setLessonPlanners(response.lessonPlanners);
       setCurrentPage(response.currentPage);
       setTotalPages(response.totalPages);
@@ -426,7 +426,7 @@ function Dashboard() {
                                   <td>{lessonPlanner.status.charAt(0).toUpperCase() + lessonPlanner.status.slice(1)}</td>
                                   <td>
                                     <Link to={`/batch/summary/manage/${lessonPlanner.trainerId?._id}/${lessonPlanner.batchId?._id}`} className='btn btn-sm btn-success' style={{ marginTop: '5px' }}>
-                                      <FontAwesomeIcon icon="fa-solid fa-coins" /> Batch / Fee Summary
+                                      <FontAwesomeIcon icon="fa-solid fa-coins" /> Fee Summary
                                     </Link>
                                   </td>
                                 </tr>
@@ -448,7 +448,7 @@ function Dashboard() {
 
             {feeSummary.paid > 0 && (
               <>
-                <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
+                <div className='col-lg-12 col-md-12 col-sm-12 col-12 d-none'>
                   <div className='row'>
                     <div className='col-lg-6 col-md-6 col-sm-12 col-12'>
                       <div className="row mb-4">
@@ -482,7 +482,7 @@ function Dashboard() {
                   </div>
                 </div>
 
-                <div className='row'>
+                <div className='row d-none'>
                   <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
                     <div className="row mb-4">
                       <div className="col-lg-12 col-md-12 mx-auto">

@@ -4,7 +4,7 @@ import config from '../config';
 const GetAll = async (page, limit, keyword) => {
     try {
         const token = localStorage.getItem("oojwt");
-        const response = await axios.get(`${config.apiUrl}courses?page=${page}&limit=${limit}&keyword=${keyword}`,
+        const response = await axios.get(`${config.apiUrl}courses/admin/all?page=${page}&limit=${limit}&keyword=${keyword}`,
             {
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -57,7 +57,7 @@ const GetById = async (id) => {
 }
 
 //create a function to send the name and image to axios post to save the course
-const Add = async (categoryId, subCategoryIds, name, image) => {
+const Add = async (categoryId, subCategoryIds, name, image, description) => {
     try {
         const data = new FormData();
         data.append("categoryId", categoryId);
@@ -69,6 +69,7 @@ const Add = async (categoryId, subCategoryIds, name, image) => {
         
         data.append("name", name);
         data.append("image", image);
+        data.append("description", description);
 
         console.log("Image in service : " + image);
 
@@ -98,7 +99,7 @@ const Add = async (categoryId, subCategoryIds, name, image) => {
     }
 }
 
-const Update = async (id, categoryId, subCategoryIds, name, image, status) => {
+const Update = async (id, categoryId, subCategoryIds, name, image, status, description) => {
     try {
         const data = new FormData();
         data.append("id", id);
@@ -110,6 +111,7 @@ const Update = async (id, categoryId, subCategoryIds, name, image, status) => {
         data.append("name", name);
         data.append("image", image);
         data.append("status", status);
+        data.append("description", description);
 
         console.log("Image in service : " + image);
 
@@ -166,4 +168,30 @@ const GetByCategoryId = async (categoryId) => {
     }
 }
 
-export { Add, Update, GetById, GetAll, GetByCategoryId };
+const TogglePublish = async (id) => {
+    try {
+        const token = localStorage.getItem("oojwt");
+        const response = await axios.put(`${config.apiUrl}courses/publish/${id}`, {},
+            {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+        console.log(response.data);
+        if (response.status === 200) {
+            return {
+                status: 200,
+                message: response.data.message,
+                course: response.data.course
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            status: error.response?.status || 500,
+            message: error.response?.data?.message || "Error publishing course"
+        };
+    }
+}
+
+export { Add, Update, GetById, GetAll, GetByCategoryId, TogglePublish };
