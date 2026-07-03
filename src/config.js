@@ -1,17 +1,17 @@
 // src/config.js
 const applicationMode = "development";
 var appName = "Playful Administration";
-var apiUrl = "http://13.234.225.146:5000/api/";
+var apiUrl = "https://playful-pencil-backend-7a58c9729e02.herokuapp.com/api/";
 var pageSize = 10;
 var logo = "/logo.png";
-var imageBasePath = "http://13.234.225.146:5000/uploads";
+var imageBasePath = "https://playful-pencil-backend-7a58c9729e02.herokuapp.com/uploads";
 
 if (applicationMode === 'development') {
   appName = "Playful Administration";
   
   //local
-  apiUrl = "http://13.234.225.146:5000/api/"; 
-  imageBasePath = "http://13.234.225.146:5000/uploads";  
+  apiUrl = "https://playful-pencil-backend-7a58c9729e02.herokuapp.com/api/"; 
+  imageBasePath = "https://playful-pencil-backend-7a58c9729e02.herokuapp.com/uploads";  
 
   //server
   //apiUrl = "http://13.53.39.107/api/";

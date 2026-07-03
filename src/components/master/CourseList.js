@@ -5,7 +5,7 @@ import config from '../../config';
 //import globalcontext
 import { useGlobalContext } from '../../GlobalContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { GetAll } from '../../service/CourseService';
+import { GetAll, TogglePublish } from '../../service/CourseService';
 
 export default function CourseList() {
 
@@ -39,6 +39,29 @@ export default function CourseList() {
   React.useEffect(() => {
     fetchCourseList(currentPage);
   }, []);
+
+  const handleTogglePublish = async (id) => {
+    try {
+      setIsLoading(true);
+      const res = await TogglePublish(id);
+      if (res.status === 200) {
+        // Refresh the list after successful toggle
+        fetchCourseList(currentPage);
+      } else {
+        setAppError(true);
+        setAppErrorTitle("Error");
+        setAppErrorMessage(res.message || "Failed to update publish status");
+        setAppErrorMode("error");
+      }
+    } catch (error) {
+      setAppError(true);
+      setAppErrorTitle("Error");
+      setAppErrorMessage("Failed to update publish status");
+      setAppErrorMode("error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -89,6 +112,7 @@ export default function CourseList() {
                         <th>Sub Categories</th>
                         <th>Name</th>
                         <th>Status</th>
+                        <th>Publish</th>
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -115,6 +139,14 @@ export default function CourseList() {
 
                           <td>{course.name}</td>
                           <td>{course.status}</td>
+                          <td>
+                            <button
+                              className={`btn btn-sm ${course.isPublished ? 'btn-success' : 'btn-secondary'}`}
+                              onClick={() => handleTogglePublish(course._id)}
+                            >
+                              {course.isPublished ? 'Published' : 'Unpublished'}
+                            </button>
+                          </td>
                           <td>
                             <Link to={`/course/manage/${course._id}`} className='btn btn-sm btn-primary'>
                               <FontAwesomeIcon icon="fa-solid fa-pen-to-square" />
