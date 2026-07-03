@@ -41,6 +41,10 @@ export default function BatchLessonPlannerEdit() {
     const [link, setLink] = useState('');
     const [remarks, setRemarks] = useState('');
     const [status, setStatus] = useState('');
+    const [screenshot1, setScreenshot1] = useState(null);
+    const [screenshot2, setScreenshot2] = useState(null);
+    const [screenshot3, setScreenshot3] = useState(null);
+    const [screenshot4, setScreenshot4] = useState(null);
 
     const formatLessonTime = (time) => {
         if (!time) return '';
@@ -157,7 +161,7 @@ export default function BatchLessonPlannerEdit() {
 
         try {
             let response = null;
-            response = await Update(id, batchId, trainerUserId, lessonTopic, lessonDate, lessonTime, lessonDuration, lessonDescription, link, remarks, status);
+            response = await Update(id, batchId, trainerUserId, lessonTopic, lessonDate, lessonTime, lessonDuration, lessonDescription, link, remarks, status,screenshot1, screenshot2, screenshot3, screenshot4);
             if (response.status === 200) {
                 setAppError(true);
                 setAppErrorTitle("Action Response");
@@ -306,6 +310,34 @@ export default function BatchLessonPlannerEdit() {
                                                         <div className="mb-3">
                                                             <label className="form-label">Lesson Description</label>
                                                             <textarea className='form-control' value={lessonDescription} onChange={(e) => setLessonDescription(e.target.value)} rows={5} />
+                                                        </div>
+                                                    </div>
+                                                    <div className='col-lg-6 col-md-6 col-sm-6 col-12'>
+                                                        <div className="mb-3">
+                                                            <label className="form-label">Screenshot 1
+                                                            </label>
+                                                            <input className='form-control' type='file' onChange={(e) => setScreenshot1(e.target.files[0])} />
+                                                        </div>
+                                                    </div>
+                                                    <div className='col-lg-6 col-md-6 col-sm-6 col-12'>
+                                                        <div className="mb-3">
+                                                            <label className="form-label">Screenshot 2
+                                                            </label>
+                                                            <input className='form-control' type='file' onChange={(e) => setScreenshot2(e.target.files[0])} />
+                                                        </div>
+                                                    </div>
+                                                    <div className='col-lg-6 col-md-6 col-sm-6 col-12'>
+                                                        <div className="mb-3">
+                                                            <label className="form-label">Screenshot 3
+                                                            </label>
+                                                            <input className='form-control' type='file' onChange={(e) => setScreenshot3(e.target.files[0])} />
+                                                        </div>
+                                                    </div>
+                                                    <div className='col-lg-6 col-md-6 col-sm-6 col-12'>
+                                                        <div className="mb-3">
+                                                            <label className="form-label">Screenshot 4
+                                                            </label>
+                                                            <input className='form-control' type='file' onChange={(e) => setScreenshot4(e.target.files[0])} />
                                                         </div>
                                                     </div>
                                                     {id && (

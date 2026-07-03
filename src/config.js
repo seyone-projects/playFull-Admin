@@ -7,7 +7,7 @@ var logo = "/logo.png";
 var imageBasePath = "https://playful-pencil-backend-7a58c9729e02.herokuapp.com/uploads";
 
 if (applicationMode === 'development') {
-  appName = "Playful Administration";
+  appName = "Admin Panel";
   
   //local
   apiUrl = "https://playful-pencil-backend-7a58c9729e02.herokuapp.com/api/"; 

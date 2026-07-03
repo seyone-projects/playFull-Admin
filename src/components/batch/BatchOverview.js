@@ -8,6 +8,7 @@ import { GetById, GetUsersByBatchId } from '../../service/BatchService';
 import { GetByBatchId as GetLessonPlannerByBatchId } from '../../service/LessonPlannerService';
 import { GetByBatchId } from '../../service/FeeSchemeService';
 import { GetByFeeSchemeId } from '../../service/FeeSchemePaymentService';
+import { GetByBatchId as GetByBatchIdBatchStudent } from '../../service/BatchStudentService';
 
 export default function BatchOverview() {
   const {
@@ -52,6 +53,8 @@ export default function BatchOverview() {
   // Fee Schemes Payment
   const [feeSchemePayments, setFeeSchemePayments] = useState([]);
 
+  const [batchStudents, setBatchStudents] = useState([]);
+
   //student count & fee
   const [studentCount, setStudentCount] = useState(0);
   const [totalToBeReceived, setTotalToBeReceived] = useState(0);
@@ -90,12 +93,11 @@ export default function BatchOverview() {
   const fetchBatchStudentList = async (page = 1) => {
     try {
       setIsLoading(true);
-      const response = await GetUsersByBatchId(id, page, itemsPerPageStudent);
-      setUsers(response.users || []);
-      setCurrentPageStudent(response.currentPage);
-      setTotalPagesStudent(response.totalPages);
-      setTotalItemsStudent(response.totalItems);
-      setStudentCount(response.totalItems || 0);
+      const response = await GetByBatchIdBatchStudent(id, page, itemsPerPageStudent);
+      setBatchStudents(response.batchStudents);
+      setCurrentPage(response.currentPage);
+      setTotalPages(response.totalPages);
+      setTotalItems(response.totalItems);
     } catch (error) {
       setAppError(true);
       setAppErrorTitle("Error");
@@ -257,21 +259,21 @@ export default function BatchOverview() {
                             </tr>
                           </thead>
                           <tbody>
-                            {users && users.map((user) => (
-                              <tr key={user._id}>
-                                <td>{user.username}</td>
-                                <td>{user.mobile}</td>
-                                <td>{user.email}</td>
+                            {batchStudents && batchStudents.map((batchStudent) => (
+                              <tr key={batchStudent.userId._id}>
+                               <td>{batchStudent.userId.username}</td>                               
+                              <td>{batchStudent.userId.mobile}</td>
+                              <td>{batchStudent.userId.email}</td>
                                 <td>
-                                  {user.joiningDate
-                                    ? (() => {
-                                      const date = new Date(user.joiningDate);
-                                      const day = String(date.getDate()).padStart(2, '0');
-                                      const month = String(date.getMonth() + 1).padStart(2, '0');
-                                      const year = date.getFullYear();
-                                      return `${day}-${month}-${year}`;
-                                    })()
-                                    : ''}
+                                  {batchStudent.userId.joiningDate
+                                  ? (() => {
+                                    const date = new Date(batchStudent.userId.joiningDate);
+                                    const day = String(date.getDate()).padStart(2, '0');
+                                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                                    const year = date.getFullYear();
+                                    return `${day}-${month}-${year}`;
+                                  })()
+                                  : ''}
                                 </td>
                               </tr>
                             ))}

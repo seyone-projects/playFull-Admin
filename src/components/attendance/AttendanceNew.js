@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GetById as GetBatchById, GetUsersByBatchId } from '../../service/BatchService';
 import { GetById as GetLessonPlannerById } from '../../service/LessonPlannerService';
 import { Add, GetByLessonPlannerId, DeleteByBatchAndLessonPlanner } from '../../service/AttendanceService';
+import { GetByBatchId as GetByBatchIdBatchStudent } from '../../service/BatchStudentService';
 
 export default function AttendanceNew() {
     const {
@@ -37,6 +38,8 @@ export default function AttendanceNew() {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const itemsPerPage = 10;
+
+    const [batchStudents, setBatchStudents] = useState([]);
 
     function formatTimeWithAMPM(timeStr) {
         if (!timeStr) return '';
@@ -98,12 +101,12 @@ export default function AttendanceNew() {
     const fetchBatchStudentList = async (page = 1) => {
         try {
             setIsLoading(true);
-            const response = await GetUsersByBatchId(batchId, page, itemsPerPage);
-            setUsers(response.users || []);
+            const response = await GetByBatchIdBatchStudent(batchId, page, itemsPerPage);
+            setBatchStudents(response.batchStudents);     
             setStudentsAttendance(
-                (response.users || []).map(u => ({
-                    id: u._id,
-                    name: u.username,
+                (response.batchStudents || []).map(u => ({
+                    id: u.userId._id,
+                    name: u.userId.username,
                     status: 'present',
                     remarks: ''
                 }))
@@ -342,22 +345,22 @@ export default function AttendanceNew() {
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                {users.map((student, index) => {
-                                                                    const sData = studentsAttendance.find(s => s.id === student._id) || {};
+                                                                {batchStudents.map((batchStudent, index) => {
+                                                                    const sData = studentsAttendance.find(s => s.id === batchStudent.userId._id) || {};
                                                                     return (
-                                                                        <tr key={student._id}>
-                                                                            <td>{student.username}</td>
+                                                                        <tr key={batchStudent.userId._id}>
+                                                                            <td>{batchStudent.userId.username}</td>
                                                                             <td className="text-center">
                                                                                 <div className="btn-group" role="group">
                                                                                     <input type="radio" className="btn-check" name={`status_${index}`} id={`present_${index}`} value="present"
                                                                                         checked={sData.status === 'present'}
-                                                                                        onChange={() => updateStudentAttendance(student._id, 'status', 'present')}
+                                                                                        onChange={() => updateStudentAttendance(batchStudent.userId._id, 'status', 'present')}
                                                                                     />
                                                                                     <label className="btn btn-outline-success btn-sm" htmlFor={`present_${index}`}>Present</label>
 
                                                                                     <input type="radio" className="btn-check" name={`status_${index}`} id={`absent_${index}`} value="absent"
                                                                                         checked={sData.status === 'absent'}
-                                                                                        onChange={() => updateStudentAttendance(student._id, 'status', 'absent')}
+                                                                                        onChange={() => updateStudentAttendance(batchStudent.userId._id, 'status', 'absent')}
                                                                                     />
                                                                                     <label className="btn btn-outline-danger btn-sm" htmlFor={`absent_${index}`}>Absent</label>
                                                                                 </div>
@@ -365,7 +368,7 @@ export default function AttendanceNew() {
                                                                             <td>
                                                                                 <input type="text" className="form-control form-control-sm"
                                                                                     value={sData.remarks || ''}
-                                                                                    onChange={e => updateStudentAttendance(student._id, 'remarks', e.target.value)}
+                                                                                    onChange={e => updateStudentAttendance(batchStudent.userId._id, 'remarks', e.target.value)}
                                                                                 />
                                                                             </td>
                                                                         </tr>
